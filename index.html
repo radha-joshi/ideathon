@@ -233,7 +233,7 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                <div class="glass rounded-2xl p-6 text-center cursor-pointer hover:shadow-lg transition" onclick="showView('view-leaderboard')">
+                <div class="glass rounded-2xl p-6 text-center cursor-pointer hover:shadow-lg transition" onclick="showView('view-green-points')">
                     <div class="text-sm text-slate-500">Green Points</div>
                     <div id="stat-points" class="text-3xl font-extrabold text-emerald-600 mt-2">1,250</div>
                 </div>
@@ -300,9 +300,104 @@
         </div>
     </section>
 
+    <!-- GREEN POINTS INFO VIEW -->
+    <section id="view-green-points" class="hidden min-h-screen flex items-start justify-center p-6">
+        <div class="max-w-3xl w-full">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-extrabold text-slate-900">Green Points</h2>
+                <button onclick="showView('view-profile')" class="text-slate-600">← Back to Profile</button>
+            </div>
+
+            <div class="glass rounded-2xl p-6 mb-6">
+                <div class="text-center mb-6">
+                    <div class="text-5xl font-extrabold text-emerald-600 mb-2" id="gp-total">1,250</div>
+                    <div class="text-sm text-slate-500">Your Current Balance</div>
+                </div>
+                <p class="text-slate-700 leading-relaxed text-center">
+                    We didn't just want a marketplace; we wanted a <strong>behavior shift</strong>. By attaching a virtual currency—Green Points—to every action, we gamify the tedious process of waste disposal. Users earn 50 points just for listing, which <strong>lowers the barrier to entry</strong>.
+                </p>
+            </div>
+
+            <div class="glass rounded-2xl p-6 mb-6">
+                <h3 class="text-lg font-bold text-slate-900 mb-4">How You Earn Points</h3>
+                <div id="points-earning" class="space-y-3">
+                    <div class="flex items-start gap-3 p-3 rounded-lg bg-emerald-50">
+                        <div class="text-2xl">📝</div>
+                        <div class="flex-1">
+                            <div class="font-bold text-slate-900">List an Item</div>
+                            <div class="text-sm text-slate-600">+50 points per listing</div>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3 p-3 rounded-lg hover:bg-slate-50">
+                        <div class="text-2xl">📸</div>
+                        <div class="flex-1">
+                            <div class="font-bold text-slate-900">Upload Image</div>
+                            <div class="text-sm text-slate-600">+10 points per quality image</div>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3 p-3 rounded-lg hover:bg-slate-50">
+                        <div class="text-2xl">♻️</div>
+                        <div class="flex-1">
+                            <div class="font-bold text-slate-900">Schedule Recycler Pickup</div>
+                            <div class="text-sm text-slate-600">+30 points per completed pickup</div>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3 p-3 rounded-lg hover:bg-slate-50">
+                        <div class="text-2xl">💬</div>
+                        <div class="flex-1">
+                            <div class="font-bold text-slate-900">Community Engagement</div>
+                            <div class="text-sm text-slate-600">+5-20 points for helpful reviews</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass rounded-2xl p-6 mb-6">
+                <h3 class="text-lg font-bold text-slate-900 mb-4">Redeem Your Points</h3>
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between p-3 rounded-lg border border-slate-200 hover:bg-slate-50">
+                        <div>
+                            <div class="font-bold text-slate-900">Discount on Next Sale</div>
+                            <div class="text-xs text-slate-500">500 points</div>
+                        </div>
+                        <button class="px-3 py-1 rounded-lg bg-emerald-600 text-white text-sm font-bold">Redeem</button>
+                    </div>
+                    <div class="flex items-center justify-between p-3 rounded-lg border border-slate-200 hover:bg-slate-50">
+                        <div>
+                            <div class="font-bold text-slate-900">Featured Listing Badge</div>
+                            <div class="text-xs text-slate-500">750 points</div>
+                        </div>
+                        <button class="px-3 py-1 rounded-lg bg-emerald-600 text-white text-sm font-bold">Redeem</button>
+                    </div>
+                    <div class="flex items-center justify-between p-3 rounded-lg border border-slate-200 hover:bg-slate-50">
+                        <div>
+                            <div class="font-bold text-slate-900">Plant a Tree (IRL)</div>
+                            <div class="text-xs text-slate-500">1000 points</div>
+                        </div>
+                        <button class="px-3 py-1 rounded-lg bg-emerald-600 text-white text-sm font-bold">Redeem</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass rounded-2xl p-6">
+                <h3 class="text-lg font-bold text-slate-900 mb-3">Impact Summary</h3>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="p-3 rounded-lg bg-slate-50">
+                        <div class="text-sm text-slate-500">Items Listed</div>
+                        <div class="text-2xl font-bold text-slate-900 mt-1">25</div>
+                    </div>
+                    <div class="p-3 rounded-lg bg-slate-50">
+                        <div class="text-sm text-slate-500">Total Earned</div>
+                        <div class="text-2xl font-bold text-emerald-600 mt-1">1,250</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <script>
         // App state
-        const VIEWS = ['view-login','view-dashboard','view-form','view-profile','view-details','view-leaderboard'];
+        const VIEWS = ['view-login','view-dashboard','view-form','view-profile','view-details','view-leaderboard','view-green-points'];
 
         // Sample dynamic items (include image URLs)
         const wasteItems = [
