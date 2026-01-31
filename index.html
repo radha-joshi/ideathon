@@ -38,6 +38,29 @@
         .btn-tactile:active{ transform: translateY(2px) scale(.998); }
         .fade-in{ animation: fadeIn .28s ease both; }
         @keyframes fadeIn{ from{opacity:0; transform: translateY(8px)} to{opacity:1; transform:none} }
+        /* Orientation / device responsive tweaks */
+        /* Ensure grid adapts when device is in landscape or portrait */
+        #items-grid { display: grid; grid-template-columns: repeat(1, minmax(0,1fr)); }
+        #items-grid article img { height: 180px; }
+
+        @media (min-width: 640px) {
+            #items-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+        }
+        @media (min-width: 1024px) {
+            #items-grid { grid-template-columns: repeat(3, minmax(0,1fr)); }
+        }
+
+        @media (orientation: landscape) and (max-width: 640px) {
+            /* small devices in landscape: show two columns */
+            #items-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+            #items-grid article img { height: 220px; }
+        }
+
+        @media (orientation: portrait) and (max-width: 640px) {
+            /* small devices in portrait: single column, smaller images */
+            #items-grid { grid-template-columns: repeat(1, minmax(0,1fr)); }
+            #items-grid article img { height: 180px; }
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen">
@@ -389,6 +412,21 @@
 
         // initialize app
         showView('view-login');
+
+        // Orientation handling: re-render or adjust layout on orientation change / resize
+        function debounce(fn, wait=120){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), wait); }; }
+
+        function handleOrientation(){
+            const isLandscape = window.innerWidth > window.innerHeight;
+            document.body.classList.toggle('is-landscape', isLandscape);
+            // re-render grid to ensure images / layout recompute if needed
+            try{ renderItems(); }catch(e){/* ignore if not mounted */}
+        }
+
+        window.addEventListener('orientationchange', handleOrientation);
+        window.addEventListener('resize', debounce(handleOrientation, 160));
+        // initial call
+        handleOrientation();
     </script>
 </body>
 </html>
