@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReCircuit — Eco Marketplace</title>
+    <script>
+        // Tailwind config: keep default emerald & slate palette
+        tailwind = {
+            config: {
+                theme: {
+                    extend: {
+                        fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] }
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root{
+            --glass-bg: rgba(255,255,255,0.64);
+            --glass-border: rgba(148,163,184,0.12);
+            --glass-shadow: 0 10px 30px rgba(2,6,23,0.08);
+        }
+        body{ font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; }
+        .glass {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(8px) saturate(120%);
+            -webkit-backdrop-filter: blur(8px) saturate(120%);
+            box-shadow: var(--glass-shadow);
+        }
+        .btn-tactile{
+            transition: transform .08s ease, box-shadow .12s ease;
+        }
+        .btn-tactile:active{ transform: translateY(2px) scale(.998); }
+        .fade-in{ animation: fadeIn .28s ease both; }
+        @keyframes fadeIn{ from{opacity:0; transform: translateY(8px)} to{opacity:1; transform:none} }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen">
+
+    <!-- LOGIN VIEW -->
+    <section id="view-login" class="min-h-screen flex items-center justify-center p-6">
+        <div class="glass rounded-2xl p-8 max-w-md w-full">
+            <div class="text-center mb-6">
+                <div class="w-14 h-14 bg-emerald-600/95 rounded-2xl inline-flex items-center justify-center text-white text-2xl font-bold">R</div>
+                <h1 class="text-2xl font-extrabold text-slate-900 mt-4">ReCircuit</h1>
+                <p class="text-sm text-slate-500 mt-1">Give electronics a second life — safely.</p>
+            </div>
+
+            <form id="login-form" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Username</label>
+                    <input id="username" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" placeholder="radha">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Password</label>
+                    <input id="password" type="password" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" placeholder="project2026">
+                </div>
+
+                <div id="login-error" class="hidden text-sm text-red-600 bg-red-50 p-3 rounded-lg">⚠️ Invalid credentials</div>
+
+                <button id="btn-login" class="w-full mt-1 py-3 rounded-2xl bg-gradient-to-b from-emerald-600 to-emerald-500 text-white font-bold btn-tactile shadow-lg">Sign in</button>
+            </form>
+
+            <p class="text-center text-xs text-slate-400 mt-4">User: <strong>radha</strong> | Pass: <strong>project2026</strong></p>
+        </div>
+    </section>
+
+    <!-- DASHBOARD -->
+    <section id="view-dashboard" class="hidden min-h-screen flex flex-col">
+        <header class="glass sticky top-4 mx-auto max-w-5xl w-full px-4 py-3 rounded-2xl flex items-center justify-between gap-4 shadow-xl" style="margin:16px 12px;">
+            <div class="flex items-center gap-3 cursor-pointer" onclick="showView('view-dashboard')">
+                <div class="w-10 h-10 bg-emerald-600 rounded-2xl flex items-center justify-center text-white font-bold">R</div>
+                <div>
+                    <div class="text-slate-800 font-bold">ReCircuit</div>
+                    <div class="text-xs text-slate-500">Clean Tech Marketplace</div>
+                </div>
+            </div>
+
+            <nav class="flex items-center gap-3">
+                <button onclick="showView('view-dashboard')" id="nav-dash" class="text-sm px-3 py-2 rounded-lg text-slate-700 hover:bg-slate-100">Dashboard</button>
+                <button onclick="showView('view-form')" id="nav-form" class="bg-emerald-600 text-white px-4 py-2 rounded-2xl text-sm font-bold btn-tactile shadow-md">+ Sell Waste</button>
+                <button onclick="showView('view-profile')" id="nav-profile" class="text-sm px-3 py-2 rounded-lg text-slate-700 hover:bg-slate-100">Impact</button>
+                <button onclick="doLogout()" class="text-sm px-3 py-2 rounded-lg text-slate-500 hover:text-slate-900">Logout</button>
+                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Radha" class="w-9 h-9 rounded-full border border-slate-200 bg-slate-100 cursor-pointer" onclick="showView('view-profile')">
+            </nav>
+        </header>
+
+        <main class="max-w-5xl mx-auto px-4 py-8 w-full">
+            <div class="mb-6">
+                <h2 class="text-xl font-extrabold text-slate-900">Community Listings</h2>
+                <p class="text-sm text-slate-500">Items available near you</p>
+            </div>
+
+            <div id="items-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </main>
+    </section>
+
+    <!-- PRODUCT DETAIL VIEW -->
+    <section id="view-details" class="hidden min-h-screen flex items-start justify-center p-6">
+        <div class="max-w-3xl w-full">
+            <div class="glass rounded-2xl p-5 mb-6">
+                <div class="flex items-center justify-between">
+                    <button onclick="showView('view-dashboard')" class="text-slate-600">← Back to Dashboard</button>
+                    <div></div>
+                </div>
+            </div>
+
+            <div class="glass rounded-2xl p-6">
+                <div class="flex items-start gap-6">
+                    <div class="flex-1">
+                        <h1 id="detail-title" class="text-2xl font-extrabold text-slate-900">Item Title</h1>
+                        <div class="mt-3 flex items-center gap-3">
+                            <div id="detail-price" class="text-2xl font-extrabold text-emerald-600">₹0</div>
+                            <div id="detail-condition" class="text-xs px-2 py-1 rounded-full bg-slate-100 text-slate-700">Condition</div>
+                        </div>
+
+                        <p id="detail-desc" class="text-slate-600 mt-4">Full description here.</p>
+                        <div class="mt-6 p-4 rounded-lg bg-slate-50">
+                            <div class="text-sm text-slate-500">Seller</div>
+                            <div id="detail-seller" class="font-medium text-slate-800 mt-1">Seller Name — Contact info</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SELL FORM -->
+    <section id="view-form" class="hidden min-h-screen flex flex-col">
+        <div class="glass mx-auto max-w-3xl w-full p-6 rounded-2xl mt-8 shadow-xl">
+            <div class="flex items-center justify-between mb-4">
+                <button onclick="showView('view-dashboard')" class="text-slate-600 hover:text-slate-900">← Back</button>
+                <h3 class="font-bold text-lg text-slate-900">List an Item</h3>
+                <div></div>
+            </div>
+
+            <form id="sell-form" class="space-y-6" onsubmit="handlePost(event)">
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Item title</label>
+                    <input id="item-title" required class="w-full p-3 rounded-xl border border-slate-200 bg-white/60 focus:outline-none focus:ring-2 focus:ring-emerald-400" placeholder="e.g. Fried GPU">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Condition</label>
+                    <div class="grid grid-cols-3 gap-3">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="condition" value="works" class="sr-only">
+                            <div class="p-4 rounded-2xl border border-slate-100 hover:bg-slate-50 peer-checked:border-emerald-500 text-center">
+                                <div class="text-xl">✅</div>
+                                <div class="font-bold">Works Fine</div>
+                                <div class="text-xs text-slate-500">Turns on, functional</div>
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="condition" value="partial" class="sr-only">
+                            <div class="p-4 rounded-2xl border border-slate-100 hover:bg-slate-50 text-center">
+                                <div class="text-xl">⚠️</div>
+                                <div class="font-bold">Partially Broken</div>
+                                <div class="text-xs text-slate-500">Some issues</div>
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="condition" value="dead" class="sr-only">
+                            <div class="p-4 rounded-2xl border border-slate-100 hover:bg-slate-50 text-center">
+                                <div class="text-xl">💀</div>
+                                <div class="font-bold">Dead / Scrap</div>
+                                <div class="text-xs text-slate-500">For parts / recycling</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div id="battery-warning" class="hidden p-3 rounded-lg bg-yellow-50 border border-yellow-100 text-yellow-800 text-sm">
+                    <strong>Safety check:</strong> Is the battery swollen or leaking? If yes, do not transport loosely — follow disposal guidelines.
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Price (optional)</label>
+                    <input id="item-price" class="w-full p-3 rounded-xl border border-slate-200 bg-white/60 focus:outline-none" placeholder="e.g. 1500 or FREE">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Attach image (optional)</label>
+                    <input id="item-image" type="file" accept="image/*" class="w-full text-sm text-slate-600">
+                    <img id="image-preview" src="" class="mt-3 w-36 h-24 object-cover rounded-lg hidden" alt="preview">
+                </div>
+
+                <div class="pt-2">
+                    <button type="submit" class="w-full py-3 rounded-2xl bg-emerald-600 text-white font-bold btn-tactile shadow-lg">Post Listing</button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <!-- PROFILE / IMPACT -->
+    <section id="view-profile" class="hidden min-h-screen flex items-start justify-center p-6">
+        <div class="max-w-4xl w-full">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-extrabold text-slate-900">Impact Profile</h2>
+                <button onclick="showView('view-dashboard')" class="text-slate-600">← Back</button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div class="glass rounded-2xl p-6 text-center">
+                    <div class="text-sm text-slate-500">Green Points</div>
+                    <div id="stat-points" class="text-3xl font-extrabold text-emerald-600 mt-2">1,250</div>
+                </div>
+                <div class="glass rounded-2xl p-6 text-center">
+                    <div class="text-sm text-slate-500">CO₂ Prevented</div>
+                    <div id="stat-co2" class="text-3xl font-extrabold text-slate-800 mt-2">12 kg</div>
+                </div>
+                <div class="glass rounded-2xl p-6 text-center">
+                    <div class="text-sm text-slate-500">Community Rank</div>
+                    <div id="stat-rank" class="text-2xl font-bold text-slate-700 mt-2">Silver Scavenger</div>
+                </div>
+            </div>
+
+            <div class="glass rounded-2xl p-6">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="text-sm font-bold text-slate-700">Progress to Gold</div>
+                    <div class="text-xs text-slate-500">45%</div>
+                </div>
+                <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
+                    <div id="progress-bar" class="h-3 bg-emerald-500 rounded-full" style="width:45%"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // App state
+        const VIEWS = ['view-login','view-dashboard','view-form','view-profile','view-details'];
+
+        // Sample dynamic items (include image URLs)
+        const wasteItems = [
+            { id:1, title:'Fried GPU (GTX 970)', condition:'dead', price:'Free', location:'Nagpur', desc:'Heavily fried, fan seized. Good for parts (VRAM, capacitors).', image:'https://picsum.photos/seed/gpu/800/600' },
+            { id:2, title:'Broken Monitor 22"', condition:'partial', price:'₹800', location:'Nagpur', desc:'Cracked bezel, display has some dead pixels.', image:'https://picsum.photos/seed/monitor/800/600' },
+            { id:3, title:'Old Nokia 3310', condition:'works', price:'₹300', location:'Nagpur', desc:'Classic, battery holds charge. Good for collectors.', image:'https://picsum.photos/seed/nokia/800/600' },
+            { id:4, title:'Laptop Battery (x2)', condition:'dead', price:'Free', location:'Nagpur', desc:'Swollen cells. Dispose safely — see safety notes.', image:'https://picsum.photos/seed/battery/800/600' },
+            { id:5, title:'Defunct DSLR', condition:'partial', price:'₹2500', location:'Nagpur', desc:'Shutter stuck, lens fine. Great for parts or repair.', image:'https://picsum.photos/seed/dslr/800/600' },
+            { id:6, title:'Dead Smartphone (Water Damaged)', condition:'dead', price:'Free', location:'Nagpur', desc:'Power circuit fried; salvageable for ICs and camera.', image:'https://picsum.photos/seed/phone/800/600' }
+        ];
+
+        // Render items into grid
+        function renderItems(){
+            const grid = document.getElementById('items-grid');
+            grid.innerHTML = wasteItems.map(item => `
+                <article class="glass rounded-2xl p-0 overflow-hidden">
+                    <div class="h-44 w-full overflow-hidden">
+                        <img src="${item.image || 'https://picsum.photos/seed/placeholder/800/600'}" alt="${item.title}" class="w-full h-full object-cover">
+                    </div>
+                    <div class="p-5">
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="text-xs font-bold px-2 py-1 rounded-full ${item.condition==='dead'? 'bg-red-100 text-red-700' : item.condition==='partial'? 'bg-yellow-50 text-yellow-700' : 'bg-emerald-50 text-emerald-700'}">${item.condition==='dead'? 'Dead / Scrap' : item.condition==='partial'? 'Partially Broken' : 'Works Fine'}</span>
+                            <span class="font-bold text-slate-800">${item.price}</span>
+                        </div>
+                        <h3 class="font-bold text-lg text-slate-900 mb-1">${item.title}</h3>
+                        <p class="text-sm text-slate-500 mb-4">${item.desc}</p>
+                        <div class="flex items-center justify-between gap-3">
+                            <div class="text-xs text-slate-500">${item.location}</div>
+                            <button onclick="openDetail(${item.id})" class="px-3 py-2 rounded-lg bg-white/50 border border-slate-100 text-sm font-medium hover:bg-slate-50">View</button>
+                        </div>
+                    </div>
+                </article>
+            `).join('');
+        }
+
+        // open detail view and populate fields
+        function openDetail(id){
+            const it = wasteItems.find(x=>x.id===id);
+            if(!it) return;
+            document.getElementById('detail-title').textContent = it.title;
+            document.getElementById('detail-price').textContent = it.price;
+            document.getElementById('detail-condition').textContent = it.condition==='dead'? 'Dead / Scrap' : it.condition==='partial'? 'Partially Broken' : 'Works Fine';
+            document.getElementById('detail-desc').textContent = it.desc;
+            document.getElementById('detail-seller').textContent = 'ReCircuit Community — ' + (it.location || 'Unknown');
+            showView('view-details');
+        }
+
+        // Simple view manager
+        function showView(viewId){
+            VIEWS.forEach(v => document.getElementById(v).classList.add('hidden'));
+            document.getElementById(viewId).classList.remove('hidden');
+            document.getElementById(viewId).classList.add('fade-in');
+
+            // special hooks
+            if(viewId === 'view-dashboard') renderItems();
+            if(viewId === 'view-profile') updateProfileStats();
+        }
+
+        // Login logic (preserve credentials)
+        document.getElementById('login-form').addEventListener('submit', function(e){
+            e.preventDefault();
+            const u = document.getElementById('username').value.trim().toLowerCase();
+            const p = document.getElementById('password').value;
+            const err = document.getElementById('login-error');
+            if(u === 'radha' && p === 'project2026'){
+                err.classList.add('hidden');
+                showView('view-dashboard');
+            } else {
+                err.classList.remove('hidden');
+                // micro shake
+                const btn = document.getElementById('btn-login');
+                btn.animate([{ transform: 'translateX(6px)' }, { transform: 'translateX(-6px)' }, { transform: 'none' }], { duration: 260, iterations:1 });
+            }
+        });
+
+        // Logout
+        function doLogout(){
+            // clear inputs
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            showView('view-login');
+        }
+
+        // Sell form smart logic
+        // show battery warning when 'dead' selected
+        const form = document.getElementById('sell-form');
+        const batteryWarning = document.getElementById('battery-warning');
+        const fileInput = document.getElementById('item-image');
+        const previewImg = document.getElementById('image-preview');
+
+        form.querySelectorAll('input[name="condition"]').forEach(r => {
+            r.addEventListener('change', () => {
+                if(r.value === 'dead' && r.checked){
+                    batteryWarning.classList.remove('hidden');
+                } else if(r.checked){
+                    batteryWarning.classList.add('hidden');
+                }
+            });
+        });
+
+        // preview selected image
+        fileInput.addEventListener('change', (e) => {
+            const f = e.target.files && e.target.files[0];
+            if(!f) { previewImg.src = ''; previewImg.classList.add('hidden'); return; }
+            const reader = new FileReader();
+            reader.onload = function(evt){ previewImg.src = evt.target.result; previewImg.classList.remove('hidden'); };
+            reader.readAsDataURL(f);
+        });
+
+        function readFileAsDataURL(file){
+            return new Promise((res, rej) => {
+                const r = new FileReader();
+                r.onload = () => res(r.result);
+                r.onerror = rej;
+                r.readAsDataURL(file);
+            });
+        }
+
+        // handle post (demo) — supports optional image upload
+        async function handlePost(e){
+            e.preventDefault();
+            const title = document.getElementById('item-title').value.trim();
+            const price = document.getElementById('item-price').value.trim() || 'Free';
+            const condEl = form.querySelector('input[name="condition"]:checked');
+            const cond = condEl ? condEl.value : 'partial';
+            let imageUrl = '';
+            const f = fileInput.files && fileInput.files[0];
+            if(f){
+                try{ imageUrl = await readFileAsDataURL(f); }catch(err){ console.error(err); }
+            }
+
+            const newItem = { id: Date.now(), title, condition: cond, price, location:'Nagpur', desc: 'Listed by you — check messages.', image: imageUrl || 'https://picsum.photos/seed/new/800/600' };
+            wasteItems.unshift(newItem);
+            // reset form
+            form.reset(); previewImg.src = ''; previewImg.classList.add('hidden');
+            // update UI and show dashboard
+            showView('view-dashboard');
+            renderItems();
+            alert('Listed: ' + title + '\n+50 Green Points');
+            const pts = parseInt(document.getElementById('stat-points').textContent.replace(/,/g,'')) + 50;
+            document.getElementById('stat-points').textContent = pts.toLocaleString();
+            const bar = document.getElementById('progress-bar');
+            const current = parseFloat(bar.style.width) || 45;
+            const next = Math.min(100, current + 3);
+            bar.style.width = next + '%';
+        }
+
+        // Profile update demo
+        function updateProfileStats(){
+            // values already set in markup; in a real app we'd fetch them
+        }
+
+        // initialize app
+        showView('view-login');
+    </script>
+</body>
+</html>
