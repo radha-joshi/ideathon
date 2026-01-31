@@ -134,8 +134,8 @@
             </div>
 
             <div class="glass rounded-2xl p-6">
-                <div class="flex items-start gap-6">
-                    <div class="flex-1">
+                <div class="flex flex-col gap-6">
+                    <div>
                         <h1 id="detail-title" class="text-2xl font-extrabold text-slate-900">Item Title</h1>
                         <div class="mt-3 flex items-center gap-3">
                             <div id="detail-price" class="text-2xl font-extrabold text-emerald-600">₹0</div>
@@ -147,6 +147,10 @@
                             <div class="text-sm text-slate-500">Seller</div>
                             <div id="detail-seller" class="font-medium text-slate-800 mt-1">Seller Name — Contact info</div>
                         </div>
+                    </div>
+
+                    <div id="pickup-button-container" class="hidden">
+                        <button onclick="openPickup()" class="w-full py-3 rounded-2xl bg-emerald-600 text-white font-bold btn-tactile shadow-lg">♻️ Schedule Recycler Pickup</button>
                     </div>
                 </div>
             </div>
@@ -229,15 +233,15 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                <div class="glass rounded-2xl p-6 text-center">
+                <div class="glass rounded-2xl p-6 text-center cursor-pointer hover:shadow-lg transition" onclick="showView('view-leaderboard')">
                     <div class="text-sm text-slate-500">Green Points</div>
                     <div id="stat-points" class="text-3xl font-extrabold text-emerald-600 mt-2">1,250</div>
                 </div>
-                <div class="glass rounded-2xl p-6 text-center">
+                <div class="glass rounded-2xl p-6 text-center cursor-pointer hover:shadow-lg transition" onclick="showView('view-leaderboard')">
                     <div class="text-sm text-slate-500">CO₂ Prevented</div>
                     <div id="stat-co2" class="text-3xl font-extrabold text-slate-800 mt-2">12 kg</div>
                 </div>
-                <div class="glass rounded-2xl p-6 text-center">
+                <div class="glass rounded-2xl p-6 text-center cursor-pointer hover:shadow-lg transition" onclick="showView('view-leaderboard')">
                     <div class="text-sm text-slate-500">Community Rank</div>
                     <div id="stat-rank" class="text-2xl font-bold text-slate-700 mt-2">Silver Scavenger</div>
                 </div>
@@ -255,9 +259,50 @@
         </div>
     </section>
 
+    <!-- RECYCLER PICKUP MODAL -->
+    <div id="modal-pickup" class="hidden fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+        <div class="glass rounded-2xl p-6 max-w-md w-full">
+            <h2 id="modal-title" class="text-xl font-bold text-slate-900">Connecting to nearest facility...</h2>
+            <p id="modal-msg" class="text-slate-600 mt-3">Please wait while we find the closest recycler in your area.</p>
+            <div id="modal-spinner" class="mt-4 flex justify-center">
+                <div class="animate-spin h-8 w-8 border-2 border-emerald-600 border-t-transparent rounded-full"></div>
+            </div>
+            <div id="modal-confirm" class="hidden mt-4">
+                <div class="p-4 bg-emerald-50 rounded-lg mb-4">
+                    <div class="text-sm text-emerald-700">
+                        <strong>✓ Pickup Scheduled!</strong><br>
+                        <span id="pickup-date">2026-02-05</span> with <strong>Eco-Nagpur Recyclers</strong><br>
+                        Estimated pickup time: 9:00 AM - 12:00 PM
+                    </div>
+                </div>
+                <button onclick="closePickupModal()" class="w-full py-2 rounded-lg bg-slate-800 text-white font-bold">Done</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- LEADERBOARD VIEW -->
+    <section id="view-leaderboard" class="hidden min-h-screen flex items-start justify-center p-6">
+        <div class="max-w-3xl w-full">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-extrabold text-slate-900">Leaderboard</h2>
+                <button onclick="showView('view-profile')" class="text-slate-600">← Back to Profile</button>
+            </div>
+
+            <div class="glass rounded-2xl p-6 mb-6">
+                <h3 class="text-lg font-bold text-slate-900 mb-4">Top Recyclers</h3>
+                <div id="leaderboard-list" class="space-y-3"></div>
+            </div>
+
+            <div class="glass rounded-2xl p-6">
+                <h3 class="text-lg font-bold text-slate-900 mb-4">Achievement Ranks</h3>
+                <div id="ranks-list" class="space-y-2"></div>
+            </div>
+        </div>
+    </section>
+
     <script>
         // App state
-        const VIEWS = ['view-login','view-dashboard','view-form','view-profile','view-details'];
+        const VIEWS = ['view-login','view-dashboard','view-form','view-profile','view-details','view-leaderboard'];
 
         // Sample dynamic items (include image URLs)
         const wasteItems = [
@@ -302,7 +347,83 @@
             document.getElementById('detail-condition').textContent = it.condition==='dead'? 'Dead / Scrap' : it.condition==='partial'? 'Partially Broken' : 'Works Fine';
             document.getElementById('detail-desc').textContent = it.desc;
             document.getElementById('detail-seller').textContent = 'ReCircuit Community — ' + (it.location || 'Unknown');
+            // show pickup button only for dead/scrap items
+            const pickupBtn = document.getElementById('pickup-button-container');
+            if(it.condition === 'dead'){ pickupBtn.classList.remove('hidden'); } else { pickupBtn.classList.add('hidden'); }
+            // store current item for pickup flow
+            window.currentDetailItem = it;
             showView('view-details');
+        }
+
+        // Recycler pickup flow
+        function openPickup(){
+            const modal = document.getElementById('modal-pickup');
+            const spinner = document.getElementById('modal-spinner');
+            const confirm = document.getElementById('modal-confirm');
+            spinner.classList.remove('hidden');
+            confirm.classList.add('hidden');
+            modal.classList.remove('hidden');
+            // simulate connection delay
+            setTimeout(() => {
+                spinner.classList.add('hidden');
+                confirm.classList.remove('hidden');
+                // generate a pickup date 2-3 days from now
+                const d = new Date(); d.setDate(d.getDate() + Math.floor(Math.random()*2) + 2);
+                document.getElementById('pickup-date').textContent = d.toLocaleDateString('en-IN');
+            }, 1800);
+        }
+
+        function closePickupModal(){
+            document.getElementById('modal-pickup').classList.add('hidden');
+            showView('view-dashboard');
+        }
+
+        // Leaderboard data
+        const dummyLeaderboard = [
+            { rank: 1, name: 'Eco Warrior', points: 3200, avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=EcoW' },
+            { rank: 2, name: 'Recycle King', points: 2850, avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=RecK' },
+            { rank: 3, name: 'You', points: 1250, avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Radha', isYou: true },
+            { rank: 4, name: 'Green Guardian', points: 1100, avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=GreenG' },
+            { rank: 5, name: 'Tech Lover', points: 980, avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=TechL' }
+        ];
+
+        const ranks = [
+            { name: 'Bronze Scavenger', points: 500, icon: '🥉' },
+            { name: 'Silver Tinkerer', points: 1000, icon: '🥈' },
+            { name: 'Gold Guardian', points: 2000, icon: '🥇' },
+            { name: 'Platinum Pioneer', points: 3500, icon: '💎' }
+        ];
+
+        // populate leaderboard
+        function populateLeaderboard(){
+            const list = document.getElementById('leaderboard-list');
+            const userPoints = parseInt(document.getElementById('stat-points').textContent.replace(/,/g,''));
+            list.innerHTML = dummyLeaderboard.map((u, i) => `
+                <div class="flex items-center gap-3 p-3 rounded-lg ${u.isYou? 'bg-emerald-50 border border-emerald-200' : 'hover:bg-slate-50'}">
+                    <div class="font-bold text-slate-500 w-6 text-center">#${u.rank}</div>
+                    <img src="${u.avatar}" class="w-10 h-10 rounded-full">
+                    <div class="flex-1">
+                        <div class="font-bold text-slate-900">${u.name}</div>
+                        <div class="text-xs text-slate-500">${u.points.toLocaleString()} points</div>
+                    </div>
+                    ${u.isYou? '<div class="text-xs px-2 py-1 rounded bg-emerald-200 text-emerald-800 font-bold">YOU</div>' : ''}
+                </div>
+            `).join('');
+
+            const ranksList = document.getElementById('ranks-list');
+            ranksList.innerHTML = ranks.map(r => {
+                const isCurrent = userPoints >= r.points && (ranks.indexOf(r) === ranks.length - 1 || userPoints < ranks[ranks.indexOf(r)+1].points);
+                return `
+                    <div class="flex items-center gap-3 p-3 rounded-lg ${isCurrent? 'bg-emerald-50 border border-emerald-300' : 'hover:bg-slate-50'}">
+                        <div class="text-2xl">${r.icon}</div>
+                        <div class="flex-1">
+                            <div class="font-bold text-slate-900">${r.name}</div>
+                            <div class="text-xs text-slate-500">${r.points.toLocaleString()} points required</div>
+                        </div>
+                        ${isCurrent? '<div class="text-xs px-2 py-1 rounded bg-emerald-200 text-emerald-800 font-bold">CURRENT</div>' : ''}
+                    </div>
+                `;
+            }).join('');
         }
 
         // Simple view manager
@@ -313,7 +434,8 @@
 
             // special hooks
             if(viewId === 'view-dashboard') renderItems();
-            if(viewId === 'view-profile') updateProfileStats();
+            if(viewId === 'view-profile') { updateProfileStats(); populateLeaderboard(); }
+            if(viewId === 'view-leaderboard') populateLeaderboard();
         }
 
         // Login logic (preserve credentials)
