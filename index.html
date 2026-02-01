@@ -65,7 +65,7 @@
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
 
-    <!-- PERSISTENT GLOBAL NAVBAR (Visible when NOT logged in) -->
+    <!-- PERSISTENT GLOBAL NAVBAR (Visible when logged in) -->
     <header id="global-navbar" class="hidden glass sticky top-4 mx-auto max-w-5xl w-full px-4 py-3 rounded-2xl flex items-center justify-between gap-4 shadow-xl mt-4 mb-4 z-40" style="align-self: center;">
         <div class="flex items-center gap-3 cursor-pointer" onclick="navTo('view-dashboard')">
             <div class="w-10 h-10 bg-emerald-600 rounded-2xl flex items-center justify-center text-white font-bold">R</div>
@@ -75,13 +75,17 @@
             </div>
         </div>
 
-        <nav class="flex items-center gap-3">
+        <nav class="flex items-center gap-4">
             <input id="search-bar" placeholder="Search items, sellers, cities..." class="px-4 py-2 rounded-xl border border-slate-200 bg-white/80 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 w-48" oninput="handleSearch()">
-            <button onclick="navTo('view-dashboard')" id="nav-dash" class="text-sm px-3 py-2 rounded-lg text-slate-700 hover:bg-slate-100">Dashboard</button>
-            <button onclick="navTo('view-form')" id="nav-form" class="bg-emerald-600 text-white px-4 py-2 rounded-2xl text-sm font-bold btn-tactile shadow-md">+ Sell Waste</button>
-            <button onclick="navTo('view-profile')" id="nav-profile" class="text-sm px-3 py-2 rounded-lg text-slate-700 hover:bg-slate-100">Impact</button>
-            <button onclick="doLogout()" class="text-sm px-3 py-2 rounded-lg text-slate-500 hover:text-slate-900">Logout</button>
-            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Radha" class="w-9 h-9 rounded-full border border-slate-200 bg-slate-100 cursor-pointer" onclick="navTo('view-profile')">
+            
+            <button onclick="navTo('view-dashboard')" id="nav-dashboard" class="text-sm px-3 py-2 pb-2 border-b-2 border-transparent text-slate-700 hover:text-slate-900 transition font-medium">📊 Dashboard</button>
+            
+            <button onclick="navTo('view-form')" id="nav-sell" class="text-sm px-3 py-2 pb-2 border-b-2 border-transparent text-slate-700 hover:text-slate-900 transition font-medium">➕ Sell Waste</button>
+            
+            <button onclick="navTo('view-profile')" id="nav-impact" class="text-sm px-3 py-2 pb-2 border-b-2 border-transparent text-slate-700 hover:text-slate-900 transition font-medium">💚 Impact</button>
+            
+            <button onclick="doLogout()" class="text-sm px-3 py-2 rounded-lg text-slate-500 hover:text-slate-900 transition">Logout</button>
+            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Radha" class="w-9 h-9 rounded-full border border-slate-200 bg-slate-100 cursor-pointer hover:ring-2 hover:ring-emerald-500 transition" onclick="navTo('view-profile')">
         </nav>
     </header>
 
@@ -385,23 +389,85 @@
         </div>
     </section>
 
-    <!-- RECYCLER PICKUP MODAL -->
-    <div id="modal-pickup" class="hidden fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-        <div class="glass rounded-2xl p-6 max-w-md w-full">
-            <h2 id="modal-title" class="text-xl font-bold text-slate-900">Connecting to nearest facility...</h2>
-            <p id="modal-msg" class="text-slate-600 mt-3">Please wait while we find the closest recycler in your area.</p>
-            <div id="modal-spinner" class="mt-4 flex justify-center">
-                <div class="animate-spin h-8 w-8 border-2 border-emerald-600 border-t-transparent rounded-full"></div>
-            </div>
-            <div id="modal-confirm" class="hidden mt-4">
-                <div class="p-4 bg-emerald-50 rounded-lg mb-4">
-                    <div class="text-sm text-emerald-700">
-                        <strong>✓ Pickup Scheduled!</strong><br>
-                        <span id="pickup-date">2026-02-05</span> with <strong>Eco-Nagpur Recyclers</strong><br>
-                        Estimated pickup time: 9:00 AM - 12:00 PM
+    <!-- RECYCLER PICKUP MODAL (Two Views: Booking & Success/Chat) -->
+    <div id="recycler-modal" class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div class="glass rounded-2xl p-6 max-w-2xl w-full max-h-screen overflow-y-auto">
+            <!-- View 1: Booking Form -->
+            <div id="recycler-view-booking" class="space-y-6">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-2xl font-bold text-slate-900">Schedule Recycler Pickup</h2>
+                    <button onclick="closeRecyclerModal()" class="text-slate-400 hover:text-slate-900">✕</button>
+                </div>
+
+                <!-- Recycler Selection Cards -->
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-3">Select a Recycler</label>
+                    <div id="recycler-cards-container" class="space-y-3"></div>
+                </div>
+
+                <!-- Date & Time -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-2">Pickup Date</label>
+                        <input id="pickup-date-input" type="date" class="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-2">Preferred Time</label>
+                        <select id="pickup-time-select" class="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            <option>9:00 AM - 12:00 PM</option>
+                            <option>12:00 PM - 3:00 PM</option>
+                            <option>3:00 PM - 6:00 PM</option>
+                            <option>6:00 PM - 9:00 PM</option>
+                        </select>
                     </div>
                 </div>
-                <button onclick="closePickupModal()" class="w-full py-2 rounded-lg bg-slate-800 text-white font-bold">Done</button>
+
+                <!-- Confirm Button -->
+                <button onclick="confirmPickup()" class="w-full py-3 rounded-2xl bg-emerald-600 text-white font-bold btn-tactile shadow-lg hover:bg-emerald-700">Confirm Pickup</button>
+                <button onclick="closeRecyclerModal()" class="w-full py-2 rounded-lg bg-slate-100 text-slate-700 font-bold hover:bg-slate-200">Cancel</button>
+            </div>
+
+            <!-- View 2: Success & Chat -->
+            <div id="recycler-view-success" class="hidden space-y-4">
+                <!-- Success Message -->
+                <div class="text-center py-4">
+                    <div class="text-6xl mb-3">✅</div>
+                    <h2 class="text-2xl font-bold text-slate-900">Pickup Scheduled!</h2>
+                    <p class="text-slate-600 mt-2">with <span id="success-recycler-name" class="font-bold"></span></p>
+                    <div class="mt-4 p-4 bg-emerald-50 rounded-lg border border-emerald-200">
+                        <div class="text-sm text-emerald-800">
+                            <div>📅 <span id="success-date"></span></div>
+                            <div>⏰ <span id="success-time"></span></div>
+                            <div>📍 <span id="success-distance"></span> km away</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Button -->
+                <button onclick="openChat()" class="w-full py-3 rounded-2xl bg-blue-600 text-white font-bold btn-tactile shadow-lg hover:bg-blue-700">💬 Chat with Driver</button>
+
+                <!-- Chat Box (Hidden by default) -->
+                <div id="chat-box" class="hidden mt-4 p-4 rounded-lg bg-slate-50 border border-slate-200 space-y-3">
+                    <!-- Chat History -->
+                    <div id="chat-history" class="space-y-2 max-h-48 overflow-y-auto bg-white rounded-lg p-3">
+                        <div class="flex gap-2">
+                            <div class="w-8 h-8 rounded-full bg-emerald-600 flex items-center justify-center text-white text-xs font-bold">D</div>
+                            <div class="bg-emerald-50 rounded-lg p-2 max-w-xs">
+                                <div class="text-sm text-slate-800">Hello! I'm on my way to you.</div>
+                                <div class="text-xs text-slate-500 mt-1">9:15 AM</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chat Input -->
+                    <div class="flex gap-2">
+                        <input id="chat-input" type="text" placeholder="Type a message..." class="flex-1 p-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        <button onclick="sendChatMessage()" class="px-4 py-2 rounded-lg bg-emerald-600 text-white font-bold hover:bg-emerald-700">Send</button>
+                    </div>
+                </div>
+
+                <!-- Done Button -->
+                <button onclick="closeRecyclerModal()" class="w-full py-2 rounded-lg bg-slate-800 text-white font-bold hover:bg-slate-900">Done</button>
             </div>
         </div>
     </div>
@@ -656,25 +722,110 @@
 
         // Recycler pickup flow
         function openPickup(){
-            const modal = document.getElementById('modal-pickup');
-            const spinner = document.getElementById('modal-spinner');
-            const confirm = document.getElementById('modal-confirm');
-            spinner.classList.remove('hidden');
-            confirm.classList.add('hidden');
-            modal.classList.remove('hidden');
-            // simulate connection delay
-            setTimeout(() => {
-                spinner.classList.add('hidden');
-                confirm.classList.remove('hidden');
-                // generate a pickup date 2-3 days from now
-                const d = new Date(); d.setDate(d.getDate() + Math.floor(Math.random()*2) + 2);
-                document.getElementById('pickup-date').textContent = d.toLocaleDateString('en-IN');
-            }, 1800);
+            openRecyclerModal();
         }
 
-        function closePickupModal(){
-            document.getElementById('modal-pickup').classList.add('hidden');
-            showView('view-dashboard');
+        // Recycler data
+        const recyclers = [
+            { id: 1, name: 'Eco-Nagpur Recyclers', distance: 0.8, rating: 4.9, reviews: 127 },
+            { id: 2, name: 'GreenCycle Solutions', distance: 2.5, rating: 4.7, reviews: 94 },
+            { id: 3, name: 'Tech Waste Management', distance: 3.2, rating: 4.6, reviews: 78 },
+            { id: 4, name: 'Sustainable Recyclers Co.', distance: 4.1, rating: 4.8, reviews: 156 },
+            { id: 5, name: 'Metro E-Waste Disposal', distance: 5.3, rating: 4.5, reviews: 62 }
+        ].sort((a, b) => a.distance - b.distance); // Sort by distance
+
+        let selectedRecyclerId = recyclers[0].id; // Pre-select closest
+
+        // Open recycler modal and populate cards
+        function openRecyclerModal(){
+            selectedRecyclerId = recyclers[0].id;
+            const container = document.getElementById('recycler-cards-container');
+            container.innerHTML = recyclers.map((r, idx) => `
+                <label class="flex items-center gap-3 p-4 rounded-lg border-2 ${ idx === 0 ? 'border-emerald-600 bg-emerald-50' : 'border-slate-200 hover:border-slate-300'} cursor-pointer transition">
+                    <input type="radio" name="recycler" value="${r.id}" ${ idx === 0 ? 'checked' : ''} onchange="selectedRecyclerId = ${r.id}" class="accent-emerald-600">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2">
+                            <div class="font-bold text-slate-900">${r.name}</div>
+                            ${ idx === 0 ? '<span class="text-xs px-2 py-1 rounded-full bg-emerald-600 text-white font-bold">🏆 Best Match / Closest</span>' : ''}
+                        </div>
+                        <div class="text-sm text-slate-600 mt-1">⭐ ${r.rating}/5 (${r.reviews} reviews) • 📍 ${r.distance} km away</div>
+                    </div>
+                </label>
+            `).join('');
+
+            // Set default date to tomorrow
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            document.getElementById('pickup-date-input').value = tomorrow.toISOString().split('T')[0];
+            document.getElementById('pickup-date-input').min = tomorrow.toISOString().split('T')[0];
+
+            // Show booking view
+            document.getElementById('recycler-view-booking').classList.remove('hidden');
+            document.getElementById('recycler-view-success').classList.add('hidden');
+            document.getElementById('recycler-modal').classList.remove('hidden');
+        }
+
+        function confirmPickup(){
+            const date = document.getElementById('pickup-date-input').value;
+            const time = document.getElementById('pickup-time-select').value;
+            if(!date) { alert('Please select a date'); return; }
+
+            const recycler = recyclers.find(r => r.id === selectedRecyclerId);
+            document.getElementById('success-recycler-name').textContent = recycler.name;
+            document.getElementById('success-date').textContent = new Date(date).toLocaleDateString('en-IN', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+            document.getElementById('success-time').textContent = time;
+            document.getElementById('success-distance').textContent = recycler.distance;
+
+            // Switch to success view
+            document.getElementById('recycler-view-booking').classList.add('hidden');
+            document.getElementById('recycler-view-success').classList.remove('hidden');
+            document.getElementById('chat-box').classList.add('hidden');
+            document.getElementById('chat-input').value = '';
+        }
+
+        function openChat(){
+            document.getElementById('chat-box').classList.remove('hidden');
+            document.getElementById('chat-input').focus();
+        }
+
+        function sendChatMessage(){
+            const input = document.getElementById('chat-input');
+            const msg = input.value.trim();
+            if(!msg) return;
+
+            const history = document.getElementById('chat-history');
+            const time = new Date().toLocaleTimeString('en-IN', {hour: '2-digit', minute: '2-digit'});
+            const userMsg = `
+                <div class="flex gap-2 justify-end">
+                    <div class="bg-emerald-600 text-white rounded-lg p-2 max-w-xs">
+                        <div class="text-sm">${msg}</div>
+                        <div class="text-xs text-emerald-100 mt-1">${time}</div>
+                    </div>
+                </div>
+            `;
+            history.innerHTML += userMsg;
+            input.value = '';
+            history.scrollTop = history.scrollHeight;
+
+            // Simulate driver response
+            setTimeout(() => {
+                const driverTime = new Date().toLocaleTimeString('en-IN', {hour: '2-digit', minute: '2-digit'});
+                const driverMsg = `
+                    <div class="flex gap-2">
+                        <div class="w-8 h-8 rounded-full bg-emerald-600 flex items-center justify-center text-white text-xs font-bold">D</div>
+                        <div class="bg-emerald-50 rounded-lg p-2 max-w-xs">
+                            <div class="text-sm text-slate-800">Got it! See you soon.</div>
+                            <div class="text-xs text-slate-500 mt-1">${driverTime}</div>
+                        </div>
+                    </div>
+                `;
+                history.innerHTML += driverMsg;
+                history.scrollTop = history.scrollHeight;
+            }, 800);
+        }
+
+        function closeRecyclerModal(){
+            document.getElementById('recycler-modal').classList.add('hidden');
         }
 
         // Leaderboard data
@@ -754,12 +905,48 @@
                 // update currentView tracker
                 window.currentView = viewId;
 
+                // Update navbar active state
+                updateNavState(viewId);
+
                 // special hooks
                 if(viewId === 'view-dashboard') renderItems();
                 if(viewId === 'view-profile') { updateProfileStats(); populateLeaderboard(); }
                 if(viewId === 'view-leaderboard') populateLeaderboard();
                 if(viewId === 'view-form') showCategoryGrid();
             }catch(e){ console.error('switchView error', e); }
+        }
+
+        // Update navbar active state based on current view
+        function updateNavState(viewId){
+            // Map views to nav button IDs
+            const navMap = {
+                'view-dashboard': 'nav-dashboard',
+                'view-form': 'nav-sell',
+                'view-profile': 'nav-impact'
+            };
+
+            // Active style classes
+            const activeClass = 'text-emerald-600 border-b-emerald-600';
+            const inactiveClass = 'text-slate-700';
+
+            // Remove active state from all nav links
+            ['nav-dashboard', 'nav-sell', 'nav-impact'].forEach(id => {
+                const el = document.getElementById(id);
+                if(el){
+                    el.classList.remove(...activeClass.split(' '));
+                    el.classList.add(...inactiveClass.split(' '));
+                }
+            });
+
+            // Add active state to current view's nav link
+            const navId = navMap[viewId];
+            if(navId){
+                const el = document.getElementById(navId);
+                if(el){
+                    el.classList.remove(...inactiveClass.split(' '));
+                    el.classList.add(...activeClass.split(' '));
+                }
+            }
         }
 
         // Back navigation: pop last view from navHistory and navigate without adding to history
