@@ -63,7 +63,29 @@
         }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen">
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- PERSISTENT GLOBAL NAVBAR (Visible when NOT logged in) -->
+    <header id="global-navbar" class="hidden glass sticky top-4 mx-auto max-w-5xl w-full px-4 py-3 rounded-2xl flex items-center justify-between gap-4 shadow-xl mt-4 mb-4 z-40" style="align-self: center;">
+        <div class="flex items-center gap-3 cursor-pointer" onclick="navTo('view-dashboard')">
+            <div class="w-10 h-10 bg-emerald-600 rounded-2xl flex items-center justify-center text-white font-bold">R</div>
+            <div>
+                <div class="text-slate-800 font-bold">ReCircuit</div>
+                <div class="text-xs text-slate-500">Clean Tech Marketplace</div>
+            </div>
+        </div>
+
+        <nav class="flex items-center gap-3">
+            <input id="search-bar" placeholder="Search items, sellers, cities..." class="px-4 py-2 rounded-xl border border-slate-200 bg-white/80 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 w-48" oninput="handleSearch()">
+            <button onclick="navTo('view-dashboard')" id="nav-dash" class="text-sm px-3 py-2 rounded-lg text-slate-700 hover:bg-slate-100">Dashboard</button>
+            <button onclick="navTo('view-form')" id="nav-form" class="bg-emerald-600 text-white px-4 py-2 rounded-2xl text-sm font-bold btn-tactile shadow-md">+ Sell Waste</button>
+            <button onclick="navTo('view-profile')" id="nav-profile" class="text-sm px-3 py-2 rounded-lg text-slate-700 hover:bg-slate-100">Impact</button>
+            <button onclick="doLogout()" class="text-sm px-3 py-2 rounded-lg text-slate-500 hover:text-slate-900">Logout</button>
+            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Radha" class="w-9 h-9 rounded-full border border-slate-200 bg-slate-100 cursor-pointer" onclick="navTo('view-profile')">
+        </nav>
+    </header>
+
+    <main id="main-content" class="flex-1 flex flex-col w-full">
 
     <!-- LOGIN VIEW -->
     <section id="view-login" class="min-h-screen flex items-center justify-center p-6">
@@ -95,32 +117,14 @@
 
     <!-- DASHBOARD -->
     <section id="view-dashboard" class="hidden min-h-screen flex flex-col">
-        <header class="glass sticky top-4 mx-auto max-w-5xl w-full px-4 py-3 rounded-2xl flex items-center justify-between gap-4 shadow-xl" style="margin:16px 12px;">
-            <div class="flex items-center gap-3 cursor-pointer" onclick="showView('view-dashboard')">
-                <div class="w-10 h-10 bg-emerald-600 rounded-2xl flex items-center justify-center text-white font-bold">R</div>
-                <div>
-                    <div class="text-slate-800 font-bold">ReCircuit</div>
-                    <div class="text-xs text-slate-500">Clean Tech Marketplace</div>
-                </div>
-            </div>
-
-            <nav class="flex items-center gap-3">
-                <button onclick="showView('view-dashboard')" id="nav-dash" class="text-sm px-3 py-2 rounded-lg text-slate-700 hover:bg-slate-100">Dashboard</button>
-                <button onclick="showView('view-form')" id="nav-form" class="bg-emerald-600 text-white px-4 py-2 rounded-2xl text-sm font-bold btn-tactile shadow-md">+ Sell Waste</button>
-                <button onclick="showView('view-profile')" id="nav-profile" class="text-sm px-3 py-2 rounded-lg text-slate-700 hover:bg-slate-100">Impact</button>
-                <button onclick="doLogout()" class="text-sm px-3 py-2 rounded-lg text-slate-500 hover:text-slate-900">Logout</button>
-                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Radha" class="w-9 h-9 rounded-full border border-slate-200 bg-slate-100 cursor-pointer" onclick="showView('view-profile')">
-            </nav>
-        </header>
-
-        <main class="max-w-5xl mx-auto px-4 py-8 w-full">
+        <div class="max-w-5xl mx-auto px-4 py-8 w-full">
             <div class="mb-6">
                 <h2 class="text-xl font-extrabold text-slate-900">Community Listings</h2>
                 <p class="text-sm text-slate-500">Items available near you</p>
             </div>
 
             <div id="items-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-        </main>
+        </div>
     </section>
 
     <!-- PRODUCT DETAIL VIEW -->
@@ -128,7 +132,7 @@
         <div class="max-w-3xl w-full">
             <div class="glass rounded-2xl p-5 mb-6">
                 <div class="flex items-center justify-between">
-                    <button onclick="showView('view-dashboard')" class="text-slate-600">← Back to Dashboard</button>
+                    <button onclick="goBack()" class="text-slate-600">← Back</button>
                     <div></div>
                 </div>
             </div>
@@ -143,14 +147,24 @@
                         </div>
 
                         <p id="detail-desc" class="text-slate-600 mt-4">Full description here.</p>
-                        <div class="mt-6 p-4 rounded-lg bg-slate-50">
-                            <div class="text-sm text-slate-500">Seller</div>
-                            <div id="detail-seller" class="font-medium text-slate-800 mt-1">Seller Name — Contact info</div>
+                    </div>
+
+                    <div class="p-4 rounded-lg bg-slate-50 cursor-pointer hover:bg-slate-100 transition" onclick="openSellerProfile()">
+                        <div class="text-sm text-slate-500">Seller</div>
+                        <div class="flex items-center gap-3 mt-2">
+                            <img id="detail-seller-avatar" src="" class="w-10 h-10 rounded-full">
+                            <div class="flex-1">
+                                <div id="detail-seller-name" class="font-bold text-slate-900"></div>
+                                <div id="detail-seller-rating" class="text-xs text-slate-500"></div>
+                            </div>
+                            <div class="text-slate-400">→</div>
                         </div>
                     </div>
 
-                    <div id="pickup-button-container" class="hidden">
-                        <button onclick="openPickup()" class="w-full py-3 rounded-2xl bg-emerald-600 text-white font-bold btn-tactile shadow-lg">♻️ Schedule Recycler Pickup</button>
+                    <button id="btn-buy" onclick="handleBuyOrClaim()" class="w-full py-3 rounded-2xl bg-emerald-600 text-white font-bold btn-tactile shadow-lg hover:bg-emerald-700">Buy Now</button>
+
+                    <div class="text-center">
+                        <button id="pickup-link" onclick="openPickup()" class="text-sm text-slate-600 hover:text-slate-900 hover:underline hidden">Item not selling? Schedule Recycler Pickup</button>
                     </div>
                 </div>
             </div>
@@ -161,15 +175,21 @@
     <section id="view-form" class="hidden min-h-screen flex flex-col">
         <div class="glass mx-auto max-w-3xl w-full p-6 rounded-2xl mt-8 shadow-xl">
             <div class="flex items-center justify-between mb-4">
-                <button onclick="showView('view-dashboard')" class="text-slate-600 hover:text-slate-900">← Back</button>
+                <button onclick="goBack()" class="text-slate-600 hover:text-slate-900">← Back</button>
                 <h3 class="font-bold text-lg text-slate-900">List an Item</h3>
                 <div></div>
             </div>
 
             <form id="sell-form" class="space-y-6" onsubmit="handlePost(event)">
-                <div>
-                    <label class="block text-sm font-bold text-slate-700 mb-2">Item title</label>
-                    <input id="item-title" required class="w-full p-3 rounded-xl border border-slate-200 bg-white/60 focus:outline-none focus:ring-2 focus:ring-emerald-400" placeholder="e.g. Fried GPU">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-2">Item title</label>
+                        <input id="item-title" required class="w-full p-3 rounded-xl border border-slate-200 bg-white/60 focus:outline-none focus:ring-2 focus:ring-emerald-400" placeholder="e.g. Fried GPU">
+                    </div>
+                    <div class="ml-4 flex items-center gap-3">
+                        <label class="text-sm text-slate-700">Pro Mode</label>
+                        <input id="pro-mode-toggle" type="checkbox" class="h-5 w-10 rounded-full accent-emerald-600" />
+                    </div>
                 </div>
 
                 <div>
@@ -206,15 +226,60 @@
                     <strong>Safety check:</strong> Is the battery swollen or leaking? If yes, do not transport loosely — follow disposal guidelines.
                 </div>
 
-                <div>
-                    <label class="block text-sm font-bold text-slate-700 mb-2">Price (optional)</label>
-                    <input id="item-price" class="w-full p-3 rounded-xl border border-slate-200 bg-white/60 focus:outline-none" placeholder="e.g. 1500 or FREE">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+                    <div class="sm:col-span-2">
+                        <label class="block text-sm font-bold text-slate-700 mb-2">Price (optional)</label>
+                        <div class="flex items-center gap-2">
+                            <input id="item-price" class="flex-1 p-3 rounded-xl border border-slate-200 bg-white/60 focus:outline-none" placeholder="e.g. 1500 or FREE">
+                            <button type="button" id="suggested-price-btn" class="px-3 py-2 rounded-lg bg-emerald-50 text-emerald-700 font-bold text-sm hover:bg-emerald-100">Suggested Price</button>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-2">Attach image (optional)</label>
+                        <input id="item-image" type="file" accept="image/*" class="w-full text-sm text-slate-600">
+                        <img id="image-preview" src="" class="mt-3 w-36 h-24 object-cover rounded-lg hidden" alt="preview">
+                    </div>
                 </div>
 
-                <div>
-                    <label class="block text-sm font-bold text-slate-700 mb-2">Attach image (optional)</label>
-                    <input id="item-image" type="file" accept="image/*" class="w-full text-sm text-slate-600">
-                    <img id="image-preview" src="" class="mt-3 w-36 h-24 object-cover rounded-lg hidden" alt="preview">
+                <!-- Tech Specs (Pro Mode) -->
+                <div id="tech-specs" class="hidden p-4 rounded-lg bg-slate-50 border border-slate-100">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div>
+                            <label class="text-sm text-slate-700">Processor</label>
+                            <input id="tech-processor" class="w-full p-2 rounded-lg border border-slate-200 mt-1" placeholder="e.g. Intel i5-6300U">
+                        </div>
+                        <div>
+                            <label class="text-sm text-slate-700">RAM</label>
+                            <input id="tech-ram" class="w-full p-2 rounded-lg border border-slate-200 mt-1" placeholder="e.g. 8GB">
+                        </div>
+                        <div>
+                            <label class="text-sm text-slate-700">Storage Type</label>
+                            <input id="tech-storage" class="w-full p-2 rounded-lg border border-slate-200 mt-1" placeholder="e.g. SSD / HDD">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Salvageable Parts (shown when condition=dead) -->
+                <div id="salvage-section" class="hidden p-4 rounded-lg bg-slate-50 border border-slate-100">
+                    <div class="text-sm font-bold text-slate-800 mb-2">Salvageable Parts</div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <label class="flex items-center gap-2"><input type="checkbox" name="salvage" value="Screen"> Screen</label>
+                        <label class="flex items-center gap-2"><input type="checkbox" name="salvage" value="Battery"> Battery</label>
+                        <label class="flex items-center gap-2"><input type="checkbox" name="salvage" value="Keyboard"> Keyboard</label>
+                        <label class="flex items-center gap-2"><input type="checkbox" name="salvage" value="Motherboard"> Motherboard</label>
+                        <label class="flex items-center gap-2"><input type="checkbox" name="salvage" value="Ports"> Ports</label>
+                    </div>
+                </div>
+
+                <!-- Data Privacy -->
+                <div class="pt-2">
+                    <label class="flex items-start gap-3">
+                        <input id="data-wipe" type="checkbox" class="mt-1">
+                        <div class="text-sm">
+                            <div class="font-bold">I certify that I have wiped my personal data.</div>
+                            <div class="text-xs text-slate-500"> <a href="#" onclick="showDataWipeGuide(); return false;" class="underline">View Data Wipe Guide</a></div>
+                        </div>
+                    </label>
                 </div>
 
                 <div class="pt-2">
@@ -228,33 +293,66 @@
     <section id="view-profile" class="hidden min-h-screen flex items-start justify-center p-6">
         <div class="max-w-4xl w-full">
             <div class="flex items-center justify-between mb-6">
-                <h2 class="text-xl font-extrabold text-slate-900">Impact Profile</h2>
-                <button onclick="showView('view-dashboard')" class="text-slate-600">← Back</button>
+                <h2 class="text-xl font-extrabold text-slate-900">My Profile</h2>
+                <button onclick="goBack()" class="text-slate-600">← Back</button>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                <div class="glass rounded-2xl p-6 text-center cursor-pointer hover:shadow-lg transition" onclick="showView('view-green-points')">
-                    <div class="text-sm text-slate-500">Green Points</div>
-                    <div id="stat-points" class="text-3xl font-extrabold text-emerald-600 mt-2">1,250</div>
-                </div>
-                <div class="glass rounded-2xl p-6 text-center cursor-pointer hover:shadow-lg transition" onclick="showView('view-leaderboard')">
-                    <div class="text-sm text-slate-500">CO₂ Prevented</div>
-                    <div id="stat-co2" class="text-3xl font-extrabold text-slate-800 mt-2">12 kg</div>
-                </div>
-                <div class="glass rounded-2xl p-6 text-center cursor-pointer hover:shadow-lg transition" onclick="showView('view-leaderboard')">
-                    <div class="text-sm text-slate-500">Community Rank</div>
-                    <div id="stat-rank" class="text-2xl font-bold text-slate-700 mt-2">Silver Scavenger</div>
+            <div class="glass rounded-2xl p-6 mb-6">
+                <div class="flex items-center gap-4">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Radha" class="w-16 h-16 rounded-full">
+                    <div class="flex-1">
+                        <h3 class="text-xl font-bold text-slate-900">Radha Joshi</h3>
+                        <div class="text-sm text-slate-500 flex items-center gap-2">
+                            <span>✓ Verified Member</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="glass rounded-2xl p-6">
-                <div class="flex items-center justify-between mb-2">
-                    <div class="text-sm font-bold text-slate-700">Progress to Gold</div>
-                    <div class="text-xs text-slate-500">45%</div>
+            <div class="flex gap-3 mb-6">
+                <button id="tab-impact" onclick="switchTab('impact')" class="px-6 py-2 rounded-xl font-bold text-slate-900 bg-emerald-100 border-b-2 border-emerald-600">📊 Impact Stats</button>
+                <button id="tab-listings" onclick="switchTab('listings')" class="px-6 py-2 rounded-xl font-bold text-slate-700 hover:bg-slate-100">📦 My Listings</button>
+                <button id="tab-history" onclick="switchTab('history')" class="px-6 py-2 rounded-xl font-bold text-slate-700 hover:bg-slate-100">🛒 Purchase History</button>
+            </div>
+
+            <!-- Tab: Impact Stats -->
+            <div id="tab-content-impact">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div class="glass rounded-2xl p-6 text-center cursor-pointer hover:shadow-lg transition" onclick="switchView('view-green-points')">
+                        <div class="text-sm text-slate-500">Green Points</div>
+                        <div id="stat-points" class="text-3xl font-extrabold text-emerald-600 mt-2">1,250</div>
+                    </div>
+                    <div class="glass rounded-2xl p-6 text-center cursor-pointer hover:shadow-lg transition" onclick="switchView('view-leaderboard')">
+                        <div class="text-sm text-slate-500">CO₂ Prevented</div>
+                        <div id="stat-co2" class="text-3xl font-extrabold text-slate-800 mt-2">12 kg</div>
+                    </div>
+                    <div class="glass rounded-2xl p-6 text-center cursor-pointer hover:shadow-lg transition" onclick="switchView('view-leaderboard')">
+                        <div class="text-sm text-slate-500">Community Rank</div>
+                        <div id="stat-rank" class="text-2xl font-bold text-slate-700 mt-2">Silver Scavenger</div>
+                    </div>
                 </div>
-                <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
-                    <div id="progress-bar" class="h-3 bg-emerald-500 rounded-full" style="width:45%"></div>
+
+                <div class="glass rounded-2xl p-6">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="text-sm font-bold text-slate-700">Progress to Gold</div>
+                        <div class="text-xs text-slate-500">45%</div>
+                    </div>
+                    <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
+                        <div id="progress-bar" class="h-3 bg-emerald-500 rounded-full" style="width:45%"></div>
+                    </div>
                 </div>
+            </div>
+
+            <!-- Tab: My Listings -->
+            <div id="tab-content-listings" class="hidden">
+                <h3 class="text-lg font-bold text-slate-900 mb-4">Items you've listed</h3>
+                <div id="my-listings-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-6"></div>
+            </div>
+
+            <!-- Tab: Purchase History -->
+            <div id="tab-content-history" class="hidden">
+                <h3 class="text-lg font-bold text-slate-900 mb-4">Your purchases</h3>
+                <div id="purchase-history-list" class="space-y-3"></div>
             </div>
         </div>
     </section>
@@ -285,7 +383,7 @@
         <div class="max-w-3xl w-full">
             <div class="flex items-center justify-between mb-6">
                 <h2 class="text-xl font-extrabold text-slate-900">Leaderboard</h2>
-                <button onclick="showView('view-profile')" class="text-slate-600">← Back to Profile</button>
+                <button onclick="goBack()" class="text-slate-600">← Back to Profile</button>
             </div>
 
             <div class="glass rounded-2xl p-6 mb-6">
@@ -305,7 +403,7 @@
         <div class="max-w-3xl w-full">
             <div class="flex items-center justify-between mb-6">
                 <h2 class="text-xl font-extrabold text-slate-900">Green Points</h2>
-                <button onclick="showView('view-profile')" class="text-slate-600">← Back to Profile</button>
+                <button onclick="goBack()" class="text-slate-600">← Back to Profile</button>
             </div>
 
             <div class="glass rounded-2xl p-6 mb-6">
@@ -395,24 +493,75 @@
         </div>
     </section>
 
+    <!-- SELLER PROFILE VIEW -->
+    <section id="view-seller" class="hidden min-h-screen flex items-start justify-center p-6">
+        <div class="max-w-3xl w-full">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-extrabold text-slate-900">Seller Profile</h2>
+                <button onclick="goBack()" class="text-slate-600">← Back</button>
+            </div>
+
+            <div class="glass rounded-2xl p-6 mb-6">
+                <div class="flex items-start gap-4">
+                    <img id="seller-avatar" src="" class="w-16 h-16 rounded-full">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-1">
+                            <h3 id="seller-name" class="text-xl font-bold text-slate-900"></h3>
+                            <span id="seller-verified" class="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-700 font-bold hidden">✓ Verified Student</span>
+                        </div>
+                        <div class="flex items-center gap-4 mt-3 flex-wrap">
+                            <div>
+                                <div class="text-sm text-slate-500">Rating</div>
+                                <div id="seller-rating" class="font-bold text-slate-900">⭐ 4.8/5</div>
+                            </div>
+                            <div>
+                                <div class="text-sm text-slate-500">Reviews</div>
+                                <div id="seller-reviews" class="font-bold text-slate-900">45</div>
+                            </div>
+                            <div>
+                                <div class="text-sm text-slate-500">Green Points</div>
+                                <div id="seller-points" class="font-bold text-emerald-600">5,200</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="text-lg font-bold text-slate-900 mb-4">Active Listings</h3>
+            <div id="seller-items-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6"></div>
+
+            <h3 class="text-lg font-bold text-slate-900 mb-4">Recent Reviews</h3>
+            <div id="seller-reviews-list" class="space-y-3"></div>
+        </div>
+    </section>
+
     <script>
         // App state
-        const VIEWS = ['view-login','view-dashboard','view-form','view-profile','view-details','view-leaderboard','view-green-points'];
+        const VIEWS = ['view-login','view-dashboard','view-form','view-profile','view-details','view-leaderboard','view-green-points','view-seller'];
 
-        // Sample dynamic items (include image URLs)
+        // Users array
+        const users = [
+            { id: 1, name: 'You (Radha)', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Radha', greenPoints: 1250, isVerified: true, rating: 4.8, reviews: ['Great service!', 'Fast pickup!', 'Highly recommend', 'Professional handling', 'Best recycler in town'], isMe: true },
+            { id: 2, name: 'EcoTech Solutions', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=EcoTech', greenPoints: 5200, isVerified: true, rating: 4.9, reviews: ['Excellent items, well-tested', 'Fair pricing and honest descriptions', 'Great communication throughout', 'Packaging was pristine', 'Purchased 3 items, all perfect'] },
+            { id: 3, name: 'GreenCycle Nagpur', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=GreenCycle', greenPoints: 3800, isVerified: true, rating: 4.7, reviews: ['Reliable seller', 'Items as described', 'Fast delivery options', 'Good customer service', 'Honest about item conditions'] }
+        ];
+
+        // Sample dynamic items (include image URLs + sellerId + pricing)
         const wasteItems = [
-            { id:1, title:'Fried GPU (GTX 970)', condition:'dead', price:'Free', location:'Nagpur', desc:'Heavily fried, fan seized. Good for parts (VRAM, capacitors).', image:'https://picsum.photos/seed/gpu/800/600' },
-            { id:2, title:'Broken Monitor 22"', condition:'partial', price:'₹800', location:'Nagpur', desc:'Cracked bezel, display has some dead pixels.', image:'https://picsum.photos/seed/monitor/800/600' },
-            { id:3, title:'Old Nokia 3310', condition:'works', price:'₹300', location:'Nagpur', desc:'Classic, battery holds charge. Good for collectors.', image:'https://picsum.photos/seed/nokia/800/600' },
-            { id:4, title:'Laptop Battery (x2)', condition:'dead', price:'Free', location:'Nagpur', desc:'Swollen cells. Dispose safely — see safety notes.', image:'https://picsum.photos/seed/battery/800/600' },
-            { id:5, title:'Defunct DSLR', condition:'partial', price:'₹2500', location:'Nagpur', desc:'Shutter stuck, lens fine. Great for parts or repair.', image:'https://picsum.photos/seed/dslr/800/600' },
-            { id:6, title:'Dead Smartphone (Water Damaged)', condition:'dead', price:'Free', location:'Nagpur', desc:'Power circuit fried; salvageable for ICs and camera.', image:'https://picsum.photos/seed/phone/800/600' }
+            { id:1, title:'Fried GPU (GTX 970)', condition:'dead', price:'Free', location:'Nagpur', desc:'Heavily fried, fan seized. Good for parts (VRAM, capacitors).', image:'https://picsum.photos/seed/gpu/800/600', sellerId: 2 },
+            { id:2, title:'Broken Monitor 22"', condition:'partial', price:'₹800', location:'Nagpur', desc:'Cracked bezel, display has some dead pixels.', image:'https://picsum.photos/seed/monitor/800/600', sellerId: 3 },
+            { id:3, title:'Old Nokia 3310', condition:'works', price:'₹300', location:'Nagpur', desc:'Classic, battery holds charge. Good for collectors.', image:'https://picsum.photos/seed/nokia/800/600', sellerId: 2 },
+            { id:4, title:'Laptop Battery (x2)', condition:'dead', price:'Free', location:'Nagpur', desc:'Swollen cells. Dispose safely — see safety notes.', image:'https://picsum.photos/seed/battery/800/600', sellerId: 1 },
+            { id:5, title:'Defunct DSLR', condition:'partial', price:'₹2500', location:'Nagpur', desc:'Shutter stuck, lens fine. Great for parts or repair.', image:'https://picsum.photos/seed/dslr/800/600', sellerId: 3 },
+            { id:6, title:'Dead Smartphone (Water Damaged)', condition:'dead', price:'Free', location:'Nagpur', desc:'Power circuit fried; salvageable for ICs and camera.', image:'https://picsum.photos/seed/phone/800/600', sellerId: 1 }
         ];
 
         // Render items into grid
-        function renderItems(){
+        function renderItems(itemsToRender = wasteItems){
             const grid = document.getElementById('items-grid');
-            grid.innerHTML = wasteItems.map(item => `
+            grid.innerHTML = itemsToRender.map(item => {
+                const seller = users.find(u => u.id === item.sellerId);
+                return `
                 <article class="glass rounded-2xl p-0 overflow-hidden">
                     <div class="h-44 w-full overflow-hidden">
                         <img src="${item.image || 'https://picsum.photos/seed/placeholder/800/600'}" alt="${item.title}" class="w-full h-full object-cover">
@@ -423,30 +572,57 @@
                             <span class="font-bold text-slate-800">${item.price}</span>
                         </div>
                         <h3 class="font-bold text-lg text-slate-900 mb-1">${item.title}</h3>
-                        <p class="text-sm text-slate-500 mb-4">${item.desc}</p>
-                        <div class="flex items-center justify-between gap-3">
+                        <p class="text-sm text-slate-500 mb-3">${item.desc}</p>
+                        <div class="flex items-center justify-between gap-3 mb-3">
                             <div class="text-xs text-slate-500">${item.location}</div>
                             <button onclick="openDetail(${item.id})" class="px-3 py-2 rounded-lg bg-white/50 border border-slate-100 text-sm font-medium hover:bg-slate-50">View</button>
                         </div>
+                        <div class="text-xs text-slate-600 p-2 rounded bg-slate-50">Seller: ${seller ? seller.name : 'Unknown'}</div>
                     </div>
                 </article>
-            `).join('');
+            `;
+            }).join('');
         }
 
         // open detail view and populate fields
         function openDetail(id){
             const it = wasteItems.find(x=>x.id===id);
             if(!it) return;
+            const seller = users.find(u => u.id === it.sellerId);
             document.getElementById('detail-title').textContent = it.title;
             document.getElementById('detail-price').textContent = it.price;
             document.getElementById('detail-condition').textContent = it.condition==='dead'? 'Dead / Scrap' : it.condition==='partial'? 'Partially Broken' : 'Works Fine';
             document.getElementById('detail-desc').textContent = it.desc;
-            document.getElementById('detail-seller').textContent = 'ReCircuit Community — ' + (it.location || 'Unknown');
-            // show pickup button only for dead/scrap items
-            const pickupBtn = document.getElementById('pickup-button-container');
-            if(it.condition === 'dead'){ pickupBtn.classList.remove('hidden'); } else { pickupBtn.classList.add('hidden'); }
-            // store current item for pickup flow
+            
+            // Seller card
+            if(seller){
+                document.getElementById('detail-seller-avatar').src = seller.avatar;
+                document.getElementById('detail-seller-name').textContent = seller.name;
+                document.getElementById('detail-seller-rating').textContent = `⭐ ${seller.rating}/5 (${seller.reviews} reviews)`;
+            }
+            
+            // Set current item and seller for later use
             window.currentDetailItem = it;
+            window.currentDetailSeller = seller;
+            
+            // Show/hide buttons based on price
+            const buyBtn = document.getElementById('btn-buy');
+            const pickupLink = document.getElementById('pickup-link');
+            if(it.price === 'Free'){
+                buyBtn.textContent = '🆓 Claim for Free';
+            } else {
+                buyBtn.textContent = '💳 Buy Now';
+            }
+            
+            // Show pickup link for dead items
+            if(it.condition === 'dead'){
+                pickupLink.classList.remove('hidden');
+            } else {
+                pickupLink.classList.add('hidden');
+            }
+            
+            // Store for back button
+            window.previousView = 'view-dashboard';
             showView('view-details');
         }
 
@@ -521,17 +697,60 @@
             }).join('');
         }
 
-        // Simple view manager
-        function showView(viewId){
-            VIEWS.forEach(v => document.getElementById(v).classList.add('hidden'));
-            document.getElementById(viewId).classList.remove('hidden');
-            document.getElementById(viewId).classList.add('fade-in');
+        // Navigation history stack
+        let navHistory = [];
+        window.currentView = null;
 
-            // special hooks
-            if(viewId === 'view-dashboard') renderItems();
-            if(viewId === 'view-profile') { updateProfileStats(); populateLeaderboard(); }
-            if(viewId === 'view-leaderboard') populateLeaderboard();
+        // Centralized view switcher. If isBackNavigation is true, the switch won't push current view into history.
+        function switchView(viewId, isBackNavigation = false){
+            try{
+                // push current view to history unless this navigation is a back action
+                if(!isBackNavigation && window.currentView && window.currentView !== viewId){
+                    navHistory.push(window.currentView);
+                }
+
+                // hide all and show target
+                VIEWS.forEach(v => document.getElementById(v).classList.add('hidden'));
+                const target = document.getElementById(viewId);
+                if(target) target.classList.remove('hidden');
+                if(target) target.classList.add('fade-in');
+
+                // Show navbar for all views except login
+                const navbar = document.getElementById('global-navbar');
+                if(viewId === 'view-login'){
+                    navbar.classList.add('hidden');
+                } else {
+                    navbar.classList.remove('hidden');
+                }
+
+                // update currentView tracker
+                window.currentView = viewId;
+
+                // special hooks
+                if(viewId === 'view-dashboard') renderItems();
+                if(viewId === 'view-profile') { updateProfileStats(); populateLeaderboard(); }
+                if(viewId === 'view-leaderboard') populateLeaderboard();
+            }catch(e){ console.error('switchView error', e); }
         }
+
+        // Back navigation: pop last view from navHistory and navigate without adding to history
+        function goBack(){
+            const last = navHistory.pop();
+            if(last){
+                switchView(last, true);
+            } else {
+                switchView('view-dashboard', true);
+            }
+        }
+
+        // navTo clears history and navigates (used by main navbar)
+        function navTo(viewId){
+            navHistory = [];
+            switchView(viewId, true);
+        }
+
+        // Keep old name for compatibility
+        const showView = switchView;
 
         // Login logic (preserve credentials)
         document.getElementById('login-form').addEventListener('submit', function(e){
@@ -559,18 +778,39 @@
         }
 
         // Sell form smart logic
-        // show battery warning when 'dead' selected
         const form = document.getElementById('sell-form');
         const batteryWarning = document.getElementById('battery-warning');
         const fileInput = document.getElementById('item-image');
         const previewImg = document.getElementById('image-preview');
+        const proToggle = document.getElementById('pro-mode-toggle');
+        const techSpecs = document.getElementById('tech-specs');
+        const salvageSection = document.getElementById('salvage-section');
+        const suggestedBtn = document.getElementById('suggested-price-btn');
 
+        // helper: show toast
+        function showToast(message, timeout=2600){
+            const t = document.createElement('div');
+            t.textContent = message;
+            t.className = 'fixed left-1/2 -translate-x-1/2 bottom-10 bg-slate-900 text-white px-4 py-2 rounded-lg shadow-lg opacity-0';
+            document.body.appendChild(t);
+            requestAnimationFrame(()=> t.classList.add('opacity-100'));
+            setTimeout(()=>{ t.classList.remove('opacity-100'); setTimeout(()=> t.remove(), 300); }, timeout);
+        }
+
+        // toggle tech specs (Pro Mode)
+        proToggle.addEventListener('change', ()=>{
+            if(proToggle.checked){ techSpecs.classList.remove('hidden'); } else { techSpecs.classList.add('hidden'); }
+        });
+
+        // show battery warning & salvage section when condition changes
         form.querySelectorAll('input[name="condition"]').forEach(r => {
             r.addEventListener('change', () => {
                 if(r.value === 'dead' && r.checked){
                     batteryWarning.classList.remove('hidden');
+                    salvageSection.classList.remove('hidden');
                 } else if(r.checked){
                     batteryWarning.classList.add('hidden');
+                    salvageSection.classList.add('hidden');
                 }
             });
         });
@@ -593,27 +833,71 @@
             });
         }
 
-        // handle post (demo) — supports optional image upload
+        // Suggested price logic
+        function parseNumericPrice(value){
+            if(!value) return 0;
+            const n = (''+value).replace(/[^0-9]/g,'');
+            return parseInt(n) || 0;
+        }
+
+        suggestedBtn.addEventListener('click', ()=>{
+            const condEl = form.querySelector('input[name="condition"]:checked');
+            const cond = condEl ? condEl.value : 'partial';
+            let suggested = 0;
+            if(cond === 'works') suggested = Math.round(500 + Math.random()*4500);
+            else if(cond === 'partial') suggested = Math.round(200 + Math.random()*1200);
+            else suggested = Math.round(50 + Math.random()*300);
+            document.getElementById('item-price').value = '₹' + suggested;
+            showToast('Based on market rates for this condition.');
+        });
+
+        // Data wipe guide
+        function showDataWipeGuide(){
+            alert('Data Wipe Guide:\n1) Factory reset the device.\n2) Remove all accounts.\n3) Overwrite storage where possible.\n4) For phones, remove SIM/SD cards.');
+        }
+
+        // handle post (demo) — supports optional image upload and new fields
         async function handlePost(e){
             e.preventDefault();
             const title = document.getElementById('item-title').value.trim();
-            const price = document.getElementById('item-price').value.trim() || 'Free';
+            const priceRaw = document.getElementById('item-price').value.trim() || '';
+            const price = priceRaw === '' ? 'Free' : priceRaw;
             const condEl = form.querySelector('input[name="condition"]:checked');
             const cond = condEl ? condEl.value : 'partial';
+
+            // data wipe required
+            if(!document.getElementById('data-wipe').checked){
+                alert('Please certify that you have wiped personal data before listing.');
+                return;
+            }
+
+            // collect tech specs
+            const tech = proToggle.checked ? {
+                processor: document.getElementById('tech-processor').value.trim(),
+                ram: document.getElementById('tech-ram').value.trim(),
+                storage: document.getElementById('tech-storage').value.trim()
+            } : null;
+
+            // salvage parts
+            const salvage = Array.from(form.querySelectorAll('input[name="salvage"]:checked')).map(i=>i.value);
+
             let imageUrl = '';
             const f = fileInput.files && fileInput.files[0];
             if(f){
                 try{ imageUrl = await readFileAsDataURL(f); }catch(err){ console.error(err); }
             }
 
-            const newItem = { id: Date.now(), title, condition: cond, price, location:'Nagpur', desc: 'Listed by you — check messages.', image: imageUrl || 'https://picsum.photos/seed/new/800/600' };
+            const newItem = { id: Date.now(), title, condition: cond, price, location:'Nagpur', desc: 'Listed by you — check messages.', image: imageUrl || 'https://picsum.photos/seed/new/800/600', techSpecs: tech, salvageParts: salvage, dataWipeConfirmed: true, sellerId: 1 };
             wasteItems.unshift(newItem);
-            // reset form
+
+            // reset form and hide sections
             form.reset(); previewImg.src = ''; previewImg.classList.add('hidden');
+            techSpecs.classList.add('hidden'); salvageSection.classList.add('hidden'); proToggle.checked = false;
+
             // update UI and show dashboard
-            showView('view-dashboard');
+            switchView('view-dashboard');
             renderItems();
-            alert('Listed: ' + title + '\n+50 Green Points');
+            showToast('Listed: ' + title + ' (+50 Green Points)');
             const pts = parseInt(document.getElementById('stat-points').textContent.replace(/,/g,'')) + 50;
             document.getElementById('stat-points').textContent = pts.toLocaleString();
             const bar = document.getElementById('progress-bar');
@@ -627,8 +911,191 @@
             // values already set in markup; in a real app we'd fetch them
         }
 
+        // Handle search
+        function handleSearch(){
+            const query = document.getElementById('search-bar').value.toLowerCase().trim();
+            if(!query){
+                renderItems(wasteItems);
+                return;
+            }
+            const filtered = wasteItems.filter(item => {
+                const seller = users.find(u => u.id === item.sellerId);
+                const sellerName = seller ? seller.name.toLowerCase() : '';
+                return (
+                    item.title.toLowerCase().includes(query) ||
+                    item.desc.toLowerCase().includes(query) ||
+                    sellerName.includes(query) ||
+                    item.location.toLowerCase().includes(query)
+                );
+            });
+            renderItems(filtered);
+        }
+
+        // Switch profile tabs
+        function switchTab(tab){
+            // Hide all tab contents
+            document.getElementById('tab-content-impact').classList.add('hidden');
+            document.getElementById('tab-content-listings').classList.add('hidden');
+            document.getElementById('tab-content-history').classList.add('hidden');
+            
+            // Reset all tab buttons
+            document.getElementById('tab-impact').classList.remove('bg-emerald-100', 'border-b-2', 'border-emerald-600');
+            document.getElementById('tab-impact').classList.add('hover:bg-slate-100', 'text-slate-700');
+            document.getElementById('tab-listings').classList.remove('bg-emerald-100', 'border-b-2', 'border-emerald-600');
+            document.getElementById('tab-listings').classList.add('hover:bg-slate-100', 'text-slate-700');
+            document.getElementById('tab-history').classList.remove('bg-emerald-100', 'border-b-2', 'border-emerald-600');
+            document.getElementById('tab-history').classList.add('hover:bg-slate-100', 'text-slate-700');
+            
+            // Show selected tab
+            if(tab === 'impact'){
+                document.getElementById('tab-content-impact').classList.remove('hidden');
+                document.getElementById('tab-impact').classList.add('bg-emerald-100', 'border-b-2', 'border-emerald-600');
+                document.getElementById('tab-impact').classList.remove('hover:bg-slate-100', 'text-slate-700');
+                document.getElementById('tab-impact').classList.add('text-slate-900');
+            } else if(tab === 'listings'){
+                document.getElementById('tab-content-listings').classList.remove('hidden');
+                document.getElementById('tab-listings').classList.add('bg-emerald-100', 'border-b-2', 'border-emerald-600');
+                document.getElementById('tab-listings').classList.remove('hover:bg-slate-100', 'text-slate-700');
+                document.getElementById('tab-listings').classList.add('text-slate-900');
+                renderMyListings();
+            } else if(tab === 'history'){
+                document.getElementById('tab-content-history').classList.remove('hidden');
+                document.getElementById('tab-history').classList.add('bg-emerald-100', 'border-b-2', 'border-emerald-600');
+                document.getElementById('tab-history').classList.remove('hover:bg-slate-100', 'text-slate-700');
+                document.getElementById('tab-history').classList.add('text-slate-900');
+                renderPurchaseHistory();
+            }
+        }
+
+        // Render my listings
+        function renderMyListings(){
+            const myItems = wasteItems.filter(item => item.sellerId === 1);
+            const grid = document.getElementById('my-listings-grid');
+            if(myItems.length === 0){
+                grid.innerHTML = '<div class="col-span-2 text-center p-8 text-slate-500">You haven\'t listed any items yet.</div>';
+                return;
+            }
+            grid.innerHTML = myItems.map(item => `
+                <div class="glass rounded-2xl p-0 overflow-hidden">
+                    <div class="h-32 w-full overflow-hidden">
+                        <img src="${item.image}" class="w-full h-full object-cover">
+                    </div>
+                    <div class="p-4">
+                        <h4 class="font-bold text-slate-900">${item.title}</h4>
+                        <div class="text-sm text-slate-500 mt-1">${item.price}</div>
+                        <button onclick="openDetail(${item.id})" class="w-full mt-2 px-3 py-2 rounded-lg bg-emerald-50 text-emerald-700 text-sm font-bold hover:bg-emerald-100">Edit / View</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Render purchase history
+        function renderPurchaseHistory(){
+            const history = document.getElementById('purchase-history-list');
+            history.innerHTML = `
+                <div class="glass rounded-2xl p-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <div class="font-bold text-slate-900">Broken Monitor 22"</div>
+                            <div class="text-sm text-slate-500">From EcoTech Solutions • ₹800</div>
+                            <div class="text-xs text-slate-400 mt-1">Purchased on 2026-01-28</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-sm font-bold text-emerald-600">Delivered</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="glass rounded-2xl p-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <div class="font-bold text-slate-900">Defunct DSLR</div>
+                            <div class="text-sm text-slate-500">From GreenCycle Nagpur • ₹2,500</div>
+                            <div class="text-xs text-slate-400 mt-1">Purchased on 2026-01-20</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-sm font-bold text-emerald-600">Delivered</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Open seller profile
+        function openSellerProfile(){
+            if(!window.currentDetailSeller) return;
+            const seller = window.currentDetailSeller;
+            document.getElementById('seller-name').textContent = seller.name;
+            document.getElementById('seller-avatar').src = seller.avatar;
+            document.getElementById('seller-rating').textContent = '⭐ ' + seller.rating + '/5';
+            document.getElementById('seller-reviews').textContent = seller.reviews.length;
+            document.getElementById('seller-points').textContent = seller.greenPoints.toLocaleString();
+            if(seller.isVerified){
+                document.getElementById('seller-verified').classList.remove('hidden');
+            } else {
+                document.getElementById('seller-verified').classList.add('hidden');
+            }
+            
+            // Show seller's items
+            const sellerItems = wasteItems.filter(item => item.sellerId === seller.id);
+            const grid = document.getElementById('seller-items-grid');
+            grid.innerHTML = sellerItems.map(item => `
+                <article class="glass rounded-2xl p-0 overflow-hidden cursor-pointer hover:shadow-lg transition" onclick="openDetail(${item.id})">
+                    <div class="h-32 w-full overflow-hidden">
+                        <img src="${item.image}" alt="${item.title}" class="w-full h-full object-cover">
+                    </div>
+                    <div class="p-4">
+                        <h4 class="font-bold text-slate-900 text-sm">${item.title}</h4>
+                        <div class="flex justify-between items-center mt-2">
+                            <span class="font-bold text-slate-800 text-sm">${item.price}</span>
+                            <span class="text-xs px-2 py-1 rounded-full ${item.condition==='dead'? 'bg-red-100 text-red-700' : item.condition==='partial'? 'bg-yellow-50 text-yellow-700' : 'bg-emerald-50 text-emerald-700'}">${item.condition==='dead'? 'Dead' : item.condition==='partial'? 'Partial' : 'Works'}</span>
+                        </div>
+                    </div>
+                </article>
+            `).join('');
+            
+            // Show recent reviews with star ratings
+            const reviewsList = document.getElementById('seller-reviews-list');
+            reviewsList.innerHTML = seller.reviews.map((review, idx) => {
+                const stars = '⭐'.repeat(Math.floor(Math.random() * 2) + 4) + '☆'.repeat(5 - Math.floor(Math.random() * 2) - 4);
+                return `
+                    <div class="glass rounded-2xl p-4">
+                        <div class="flex items-start justify-between mb-2">
+                            <div class="font-bold text-slate-900 text-sm">Customer ${idx + 1}</div>
+                            <div class="text-sm text-amber-500">${stars}</div>
+                        </div>
+                        <p class="text-sm text-slate-600">${review}</p>
+                    </div>
+                `;
+            }).join('');
+            
+            window.previousView = 'view-details';
+            showView('view-seller');
+        }
+
+        // Handle buy or claim
+        function handleBuyOrClaim(){
+            const item = window.currentDetailItem;
+            if(!item) return;
+            
+            if(item.price === 'Free'){
+                alert('🆓 Item claimed successfully!\n\nYou can now arrange pickup with the seller.');
+                // Could add to purchase history here
+            } else {
+                alert('💳 Proceeding to checkout...\n\nTotal: ' + item.price + '\n\nDemo mode — simulated payment.');
+                // Could integrate real payment here
+            }
+            showView('view-dashboard');
+        }
+
+        // Back button navigation
+        function goBack(){
+            showView(window.previousView || 'view-dashboard');
+        }
+
         // initialize app
         showView('view-login');
+        renderItems();
+        renderMyListings();
 
         // Orientation handling: re-render or adjust layout on orientation change / resize
         function debounce(fn, wait=120){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), wait); }; }
@@ -645,5 +1112,7 @@
         // initial call
         handleOrientation();
     </script>
+
+    </main>
 </body>
 </html>
