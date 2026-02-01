@@ -171,7 +171,7 @@
         </div>
     </section>
 
-    <!-- SELL FORM -->
+    <!-- SELL FORM (Category-first flow) -->
     <section id="view-form" class="hidden min-h-screen flex flex-col">
         <div class="glass mx-auto max-w-3xl w-full p-6 rounded-2xl mt-8 shadow-xl">
             <div class="flex items-center justify-between mb-4">
@@ -180,112 +180,140 @@
                 <div></div>
             </div>
 
-            <form id="sell-form" class="space-y-6" onsubmit="handlePost(event)">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <label class="block text-sm font-bold text-slate-700 mb-2">Item title</label>
-                        <input id="item-title" required class="w-full p-3 rounded-xl border border-slate-200 bg-white/60 focus:outline-none focus:ring-2 focus:ring-emerald-400" placeholder="e.g. Fried GPU">
+            <!-- Step 1: Category Grid -->
+            <div id="category-grid" class="space-y-6">
+                <h2 class="text-xl font-bold text-slate-900">What are you listing?</h2>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                    <div class="glass p-4 rounded-2xl cursor-pointer hover:shadow-lg transition" onclick="chooseCategory('smartphone')">
+                        <div class="text-2xl">📱</div>
+                        <div class="font-bold mt-2">Smartphone</div>
+                        <div class="text-xs text-slate-500">Screen, storage, battery</div>
                     </div>
-                    <div class="ml-4 flex items-center gap-3">
-                        <label class="text-sm text-slate-700">Pro Mode</label>
-                        <input id="pro-mode-toggle" type="checkbox" class="h-5 w-10 rounded-full accent-emerald-600" />
+                    <div class="glass p-4 rounded-2xl cursor-pointer hover:shadow-lg transition" onclick="chooseCategory('laptop')">
+                        <div class="text-2xl">💻</div>
+                        <div class="font-bold mt-2">Laptop</div>
+                        <div class="text-xs text-slate-500">Processor, RAM, Battery</div>
+                    </div>
+                    <div class="glass p-4 rounded-2xl cursor-pointer hover:shadow-lg transition" onclick="chooseCategory('monitor')">
+                        <div class="text-2xl">🖥️</div>
+                        <div class="font-bold mt-2">Monitor / TV</div>
+                        <div class="text-xs text-slate-500">Screen size, dead pixels</div>
+                    </div>
+                    <div class="glass p-4 rounded-2xl cursor-pointer hover:shadow-lg transition" onclick="chooseCategory('pccomponent')">
+                        <div class="text-2xl">🎮</div>
+                        <div class="font-bold mt-2">PC Component</div>
+                        <div class="text-xs text-slate-500">Part name, model, VRAM</div>
+                    </div>
+                    <div class="glass p-4 rounded-2xl cursor-pointer hover:shadow-lg transition col-span-2 sm:col-span-1" onclick="chooseCategory('other')">
+                        <div class="text-2xl">🔌</div>
+                        <div class="font-bold mt-2">Other / Cables</div>
+                        <div class="text-xs text-slate-500">Generic listing</div>
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-bold text-slate-700 mb-2">Condition</label>
-                    <div class="grid grid-cols-3 gap-3">
-                        <label class="cursor-pointer">
-                            <input type="radio" name="condition" value="works" class="sr-only">
-                            <div class="p-4 rounded-2xl border border-slate-100 hover:bg-slate-50 peer-checked:border-emerald-500 text-center">
-                                <div class="text-xl">✅</div>
-                                <div class="font-bold">Works Fine</div>
-                                <div class="text-xs text-slate-500">Turns on, functional</div>
-                            </div>
-                        </label>
-                        <label class="cursor-pointer">
-                            <input type="radio" name="condition" value="partial" class="sr-only">
-                            <div class="p-4 rounded-2xl border border-slate-100 hover:bg-slate-50 text-center">
-                                <div class="text-xl">⚠️</div>
-                                <div class="font-bold">Partially Broken</div>
-                                <div class="text-xs text-slate-500">Some issues</div>
-                            </div>
-                        </label>
-                        <label class="cursor-pointer">
-                            <input type="radio" name="condition" value="dead" class="sr-only">
-                            <div class="p-4 rounded-2xl border border-slate-100 hover:bg-slate-50 text-center">
-                                <div class="text-xl">💀</div>
-                                <div class="font-bold">Dead / Scrap</div>
-                                <div class="text-xs text-slate-500">For parts / recycling</div>
-                            </div>
-                        </label>
+                    <button onclick="openPickup();" class="w-full py-3 rounded-2xl border-2 border-red-400 text-red-600 bg-transparent font-bold">Wait, this is just scrap junk. Schedule Recycler Pickup directly</button>
+                </div>
+            </div>
+
+            <!-- Step 2: Dynamic Form (hidden initially) -->
+            <div id="category-form" class="hidden">
+                <div class="flex items-center justify-between mb-4">
+                    <button onclick="showCategoryGrid()" class="text-sm text-slate-600 hover:text-slate-900">← Back to Categories</button>
+                    <div class="flex items-center gap-3">
+                        <label class="text-sm text-slate-700 mr-2">Pro Mode</label>
+                        <input id="pro-mode-toggle" type="checkbox" class="h-5 w-10 rounded-full accent-emerald-600" />
                     </div>
                 </div>
 
-                <div id="battery-warning" class="hidden p-3 rounded-lg bg-yellow-50 border border-yellow-100 text-yellow-800 text-sm">
-                    <strong>Safety check:</strong> Is the battery swollen or leaking? If yes, do not transport loosely — follow disposal guidelines.
+                <div class="flex items-center justify-between mb-4">
+                    <div class="text-sm text-slate-600">Category: <span id="selected-category-label" class="font-bold text-slate-800"></span></div>
+                    <button id="change-category-btn" onclick="changeCategory()" class="text-sm px-3 py-1 rounded-lg bg-slate-100 hover:bg-slate-50">Change Category</button>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
-                    <div class="sm:col-span-2">
-                        <label class="block text-sm font-bold text-slate-700 mb-2">Price (optional)</label>
-                        <div class="flex items-center gap-2">
-                            <input id="item-price" class="flex-1 p-3 rounded-xl border border-slate-200 bg-white/60 focus:outline-none" placeholder="e.g. 1500 or FREE">
-                            <button type="button" id="suggested-price-btn" class="px-3 py-2 rounded-lg bg-emerald-50 text-emerald-700 font-bold text-sm hover:bg-emerald-100">Suggested Price</button>
-                        </div>
-                    </div>
+                <form id="sell-form" class="space-y-6" onsubmit="handlePost(event)">
                     <div>
-                        <label class="block text-sm font-bold text-slate-700 mb-2">Attach image (optional)</label>
-                        <input id="item-image" type="file" accept="image/*" class="w-full text-sm text-slate-600">
-                        <img id="image-preview" src="" class="mt-3 w-36 h-24 object-cover rounded-lg hidden" alt="preview">
+                        <label class="block text-sm font-bold text-slate-700 mb-2">Item title</label>
+                        <input id="item-title" required class="w-full p-3 rounded-xl border border-slate-200 bg-white/60 focus:outline-none focus:ring-2 focus:ring-emerald-400" placeholder="e.g. Fried GPU">
                     </div>
-                </div>
 
-                <!-- Tech Specs (Pro Mode) -->
-                <div id="tech-specs" class="hidden p-4 rounded-lg bg-slate-50 border border-slate-100">
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <div>
-                            <label class="text-sm text-slate-700">Processor</label>
-                            <input id="tech-processor" class="w-full p-2 rounded-lg border border-slate-200 mt-1" placeholder="e.g. Intel i5-6300U">
+                    <div id="dynamic-fields"></div>
+                    <div id="dynamic-pro-fields" class="hidden"></div>
+
+                    <div id="common-fields" class="space-y-4">
+                        <div id="battery-warning" class="hidden p-3 rounded-lg bg-yellow-50 border border-yellow-100 text-yellow-800 text-sm">
+                            <strong>Safety check:</strong> Is the battery swollen or leaking? If yes, do not transport loosely — follow disposal guidelines.
                         </div>
-                        <div>
-                            <label class="text-sm text-slate-700">RAM</label>
-                            <input id="tech-ram" class="w-full p-2 rounded-lg border border-slate-200 mt-1" placeholder="e.g. 8GB">
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+                            <div class="sm:col-span-2">
+                                <label class="block text-sm font-bold text-slate-700 mb-2">Price (optional)</label>
+                                <div class="flex items-center gap-2">
+                                    <input id="item-price" class="flex-1 p-3 rounded-xl border border-slate-200 bg-white/60 focus:outline-none" placeholder="e.g. 1500 or FREE">
+                                    <button type="button" id="suggested-price-btn" class="px-3 py-2 rounded-lg bg-emerald-50 text-emerald-700 font-bold text-sm hover:bg-emerald-100">Suggested Price</button>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 mb-2">Attach image (optional)</label>
+                                <input id="item-image" type="file" accept="image/*" class="w-full text-sm text-slate-600">
+                                <img id="image-preview" src="" class="mt-3 w-36 h-24 object-cover rounded-lg hidden" alt="preview">
+                            </div>
                         </div>
+
+                        <!-- Description -->
                         <div>
-                            <label class="text-sm text-slate-700">Storage Type</label>
-                            <input id="tech-storage" class="w-full p-2 rounded-lg border border-slate-200 mt-1" placeholder="e.g. SSD / HDD">
+                            <label class="block text-sm font-bold text-slate-700 mb-2">Description</label>
+                            <textarea id="item-desc" placeholder="Any other issues?" rows="4" class="w-full p-3 rounded-xl border border-slate-200 bg-white/60"></textarea>
+                        </div>
+
+                        <!-- Price & Negotiation -->
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+                            <div class="sm:col-span-2">
+                                <label class="block text-sm font-bold text-slate-700 mb-2">Price (₹)</label>
+                                <div class="flex items-center gap-2">
+                                    <input id="item-price" class="flex-1 p-3 rounded-xl border border-slate-200 bg-white/60 focus:outline-none" placeholder="e.g. 1500 or FREE">
+                                    <button type="button" id="suggested-price-btn" class="px-3 py-2 rounded-lg bg-emerald-50 text-emerald-700 font-bold text-sm hover:bg-emerald-100">✨ AI Price Estimator</button>
+                                </div>
+                                <label class="flex items-center gap-3 mt-2"><input id="open-to-negotiation" type="checkbox"> Open to Negotiation</label>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 mb-2">Attach image (optional)</label>
+                                <input id="item-image" type="file" accept="image/*" class="w-full text-sm text-slate-600">
+                                <img id="image-preview" src="" class="mt-3 w-36 h-24 object-cover rounded-lg hidden" alt="preview">
+                            </div>
+                        </div>
+
+                        <!-- Salvageable Parts (shown when condition=dead) -->
+                        <div id="salvage-section" class="hidden p-4 rounded-lg bg-slate-50 border border-slate-100">
+                            <div class="text-sm font-bold text-slate-800 mb-2">Salvageable Parts</div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <label class="flex items-center gap-2"><input type="checkbox" name="salvage" value="Screen"> Screen</label>
+                                <label class="flex items-center gap-2"><input type="checkbox" name="salvage" value="Battery"> Battery</label>
+                                <label class="flex items-center gap-2"><input type="checkbox" name="salvage" value="Keyboard"> Keyboard</label>
+                                <label class="flex items-center gap-2"><input type="checkbox" name="salvage" value="Motherboard"> Motherboard</label>
+                                <label class="flex items-center gap-2"><input type="checkbox" name="salvage" value="Ports"> Ports</label>
+                            </div>
+                        </div>
+
+                        <!-- Data Privacy -->
+                        <div class="pt-2">
+                            <label class="flex items-start gap-3">
+                                <input id="data-wipe" type="checkbox" class="mt-1">
+                                <div class="text-sm">
+                                    <div class="font-bold">I certify that I have wiped my personal data.</div>
+                                    <div class="text-xs text-slate-500"> <a href="#" onclick="showDataWipeGuide(); return false;" class="underline">View Data Wipe Guide</a></div>
+                                </div>
+                            </label>
+                        </div>
+
+                        <div class="pt-2">
+                            <button type="submit" class="w-full py-3 rounded-2xl bg-emerald-600 text-white font-bold btn-tactile shadow-lg">Post Listing</button>
                         </div>
                     </div>
-                </div>
-
-                <!-- Salvageable Parts (shown when condition=dead) -->
-                <div id="salvage-section" class="hidden p-4 rounded-lg bg-slate-50 border border-slate-100">
-                    <div class="text-sm font-bold text-slate-800 mb-2">Salvageable Parts</div>
-                    <div class="grid grid-cols-2 gap-2">
-                        <label class="flex items-center gap-2"><input type="checkbox" name="salvage" value="Screen"> Screen</label>
-                        <label class="flex items-center gap-2"><input type="checkbox" name="salvage" value="Battery"> Battery</label>
-                        <label class="flex items-center gap-2"><input type="checkbox" name="salvage" value="Keyboard"> Keyboard</label>
-                        <label class="flex items-center gap-2"><input type="checkbox" name="salvage" value="Motherboard"> Motherboard</label>
-                        <label class="flex items-center gap-2"><input type="checkbox" name="salvage" value="Ports"> Ports</label>
-                    </div>
-                </div>
-
-                <!-- Data Privacy -->
-                <div class="pt-2">
-                    <label class="flex items-start gap-3">
-                        <input id="data-wipe" type="checkbox" class="mt-1">
-                        <div class="text-sm">
-                            <div class="font-bold">I certify that I have wiped my personal data.</div>
-                            <div class="text-xs text-slate-500"> <a href="#" onclick="showDataWipeGuide(); return false;" class="underline">View Data Wipe Guide</a></div>
-                        </div>
-                    </label>
-                </div>
-
-                <div class="pt-2">
-                    <button type="submit" class="w-full py-3 rounded-2xl bg-emerald-600 text-white font-bold btn-tactile shadow-lg">Post Listing</button>
-                </div>
-            </form>
+                </form>
+            </div>
+        </div>
+    </section>
         </div>
     </section>
 
@@ -730,6 +758,7 @@
                 if(viewId === 'view-dashboard') renderItems();
                 if(viewId === 'view-profile') { updateProfileStats(); populateLeaderboard(); }
                 if(viewId === 'view-leaderboard') populateLeaderboard();
+                if(viewId === 'view-form') showCategoryGrid();
             }catch(e){ console.error('switchView error', e); }
         }
 
@@ -783,9 +812,248 @@
         const fileInput = document.getElementById('item-image');
         const previewImg = document.getElementById('image-preview');
         const proToggle = document.getElementById('pro-mode-toggle');
-        const techSpecs = document.getElementById('tech-specs');
         const salvageSection = document.getElementById('salvage-section');
         const suggestedBtn = document.getElementById('suggested-price-btn');
+
+        // Category-specific dynamic field templates
+        const categoryTemplates = {
+            smartphone: `
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Condition</label>
+                    <div class="flex gap-3 text-sm mb-3">
+                        <label><input type="radio" name="condition" value="works" checked> Works</label>
+                        <label><input type="radio" name="condition" value="partial"> Partially Broken</label>
+                        <label><input type="radio" name="condition" value="dead"> Dead / Scrap</label>
+                    </div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Operating System</label>
+                    <select id="field-os" class="w-full p-3 rounded-xl border border-slate-200 mb-3">
+                        <option>Android</option>
+                        <option>iOS</option>
+                    </select>
+
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Storage Capacity</label>
+                    <input id="field-storage" placeholder="e.g. 64GB, 128GB" class="w-full p-3 rounded-xl border border-slate-200 mb-3">
+
+                    <label class="flex items-center gap-3 mb-2"><input id="field-frp" type="checkbox"> Is it Cloud / FRP Locked?</label>
+                    <label class="flex items-center gap-3"><input id="field-screen-cracked" type="checkbox"> Screen Cracked?</label>
+                </div>
+            `,
+
+            laptop: `
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Condition</label>
+                    <div class="flex gap-3 text-sm mb-3">
+                        <label><input type="radio" name="condition" value="works" checked> Works</label>
+                        <label><input type="radio" name="condition" value="partial"> Partially Broken</label>
+                        <label><input type="radio" name="condition" value="dead"> Dead / Scrap</label>
+                    </div>
+
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Processor Model</label>
+                    <input id="field-processor-model" placeholder="e.g. i5 8th Gen, M1" class="w-full p-3 rounded-xl border border-slate-200 mb-3">
+
+                    <label class="block text-sm font-bold text-slate-700 mb-2">RAM Size</label>
+                    <input id="field-ram-size" placeholder="e.g. 8GB, 16GB" class="w-full p-3 rounded-xl border border-slate-200 mb-3">
+
+                    <div class="mb-3">
+                        <div class="text-sm font-bold mb-1">Storage Type</div>
+                        <label class="mr-3"><input type="radio" name="storage_type" value="HDD"> HDD</label>
+                        <label class="mr-3"><input type="radio" name="storage_type" value="SSD" checked> SSD</label>
+                        <label><input type="radio" name="storage_type" value="None"> None</label>
+                    </div>
+
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Battery Health</label>
+                    <select id="field-battery-health" class="w-full p-3 rounded-xl border border-slate-200 mb-3">
+                        <option>Good</option>
+                        <option>Weak</option>
+                        <option>Dead</option>
+                        <option>Missing</option>
+                    </select>
+                </div>
+            `,
+
+            monitor: `
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Condition</label>
+                    <div class="flex gap-3 text-sm mb-3">
+                        <label><input type="radio" name="condition" value="works" checked> Works</label>
+                        <label><input type="radio" name="condition" value="partial"> Partially Broken</label>
+                        <label><input type="radio" name="condition" value="dead"> Dead / Scrap</label>
+                    </div>
+
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Screen Size (inches)</label>
+                    <input id="field-screen-size" placeholder="e.g. 22" class="w-full p-3 rounded-xl border border-slate-200 mb-3">
+
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Panel Condition</label>
+                    <select id="field-panel-condition" class="w-full p-3 rounded-xl border border-slate-200 mb-3">
+                        <option>Working</option>
+                        <option>Lines on Screen</option>
+                        <option>Cracked</option>
+                        <option>Black Screen</option>
+                    </select>
+
+                    <label class="flex items-center gap-3"><input id="field-power-cable" type="checkbox"> Includes Power Cable?</label>
+                </div>
+            `,
+
+            pccomponent: `
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Condition</label>
+                    <div class="flex gap-3 text-sm mb-3">
+                        <label><input type="radio" name="condition" value="works" checked> Works</label>
+                        <label><input type="radio" name="condition" value="partial"> Partially Broken</label>
+                        <label><input type="radio" name="condition" value="dead"> Dead / Scrap</label>
+                    </div>
+
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Part Name & Model</label>
+                    <input id="field-part-name" placeholder="e.g. Nvidia GTX 1050Ti" class="w-full p-3 rounded-xl border border-slate-200 mb-3">
+
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Model Number</label>
+                    <input id="field-model-number" placeholder="e.g. GTx-1050Ti-4GB" class="w-full p-3 rounded-xl border border-slate-200 mb-3">
+
+                    <label class="flex items-center gap-3 mb-2"><input id="field-tested" type="checkbox"> Tested & Working?</label>
+
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Known Issues</label>
+                    <textarea id="field-known-issues" rows="3" class="w-full p-3 rounded-xl border border-slate-200 mb-3" placeholder="e.g. Fan noise, overheating"></textarea>
+
+                    <label class="block text-sm font-bold text-slate-700 mb-2">VRAM / Specs (optional)</label>
+                    <input id="field-vram" placeholder="e.g. 4GB GDDR5" class="w-full p-3 rounded-xl border border-slate-200 mb-3">
+                </div>
+            `,
+
+            other: `
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Condition</label>
+                    <div class="flex gap-3 text-sm mb-3">
+                        <label><input type="radio" name="condition" value="works" checked> New</label>
+                        <label><input type="radio" name="condition" value="partial"> Used</label>
+                        <label><input type="radio" name="condition" value="dead"> Frayed / Damaged</label>
+                    </div>
+
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Type</label>
+                    <select id="field-accessory-type" class="w-full p-3 rounded-xl border border-slate-200 mb-3">
+                        <option>Charger</option>
+                        <option>HDMI</option>
+                        <option>Keyboard</option>
+                        <option>Mouse</option>
+                    </select>
+                </div>
+            `
+        };
+
+        // Pro-mode extra fields per category
+        const proTemplates = {
+            smartphone: `
+                <div class="p-3 rounded-lg bg-slate-50 border border-slate-100 mb-3">
+                    <label class="block text-sm font-bold text-slate-700 mb-2">IMEI / Serial (optional)</label>
+                    <input id="pro-imei" class="w-full p-2 rounded-lg border border-slate-200" placeholder="e.g. 358723...">
+                    <label class="flex items-center gap-3 mt-3"><input id="pro-bootloader-locked" type="checkbox"> Bootloader / BIOS Locked?</label>
+                </div>
+            `,
+            laptop: `
+                <div class="p-3 rounded-lg bg-slate-50 border border-slate-100 mb-3">
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Model Number</label>
+                    <input id="pro-model-number" class="w-full p-2 rounded-lg border border-slate-200" placeholder="e.g. MacBookPro15,1">
+                    <label class="block text-sm font-bold text-slate-700 mb-2 mt-3">Thermal Paste Status</label>
+                    <select id="pro-thermal" class="w-full p-2 rounded-lg border border-slate-200">
+                        <option>Unknown</option>
+                        <option>Recently Reapplied</option>
+                        <option>Needs Replacing</option>
+                    </select>
+                    <label class="flex items-center gap-3 mt-3"><input id="pro-bios-locked" type="checkbox"> BIOS Locked?</label>
+                </div>
+            `,
+            monitor: `
+                <div class="p-3 rounded-lg bg-slate-50 border border-slate-100 mb-3">
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Manufacturer Model</label>
+                    <input id="pro-monitor-model" class="w-full p-2 rounded-lg border border-slate-200" placeholder="e.g. LG UltraGear 27GL83A">
+                </div>
+            `,
+            pccomponent: `
+                <div class="p-3 rounded-lg bg-slate-50 border border-slate-100 mb-3">
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Detailed Part SKU / Serial</label>
+                    <input id="pro-part-sku" class="w-full p-2 rounded-lg border border-slate-200" placeholder="e.g. P/N: 12345-XYZ">
+                    <label class="flex items-center gap-3 mt-3"><input id="pro-tested-working" type="checkbox"> Verified bench-tested?</label>
+                </div>
+            `,
+            other: `
+                <div class="p-3 rounded-lg bg-slate-50 border border-slate-100 mb-3">
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Accessory Notes</label>
+                    <input id="pro-accessory-notes" class="w-full p-2 rounded-lg border border-slate-200" placeholder="Brand, compatibility">
+                </div>
+            `
+        };
+
+        // Attach listeners to condition radios (re-run after injecting dynamic fields)
+        function attachConditionListeners(){
+            const conds = form.querySelectorAll('input[name="condition"]');
+            conds.forEach(r => {
+                r.removeEventListener('change', conditionChangeHandler);
+                r.addEventListener('change', conditionChangeHandler);
+            });
+        }
+
+        function conditionChangeHandler(e){
+            const r = e.target;
+            if(r.value === 'dead' && r.checked){
+                batteryWarning.classList.remove('hidden');
+                salvageSection.classList.remove('hidden');
+            } else if(r.checked){
+                batteryWarning.classList.add('hidden');
+                salvageSection.classList.add('hidden');
+            }
+        }
+
+        // collect pro-mode inputs generically
+        function collectProData(){
+            const container = document.getElementById('dynamic-pro-fields');
+            if(!container) return null;
+            const data = {};
+            container.querySelectorAll('input, select, textarea').forEach(el => {
+                if(!el.id) return;
+                if(el.type === 'checkbox') data[el.id] = el.checked;
+                else data[el.id] = el.value;
+            });
+            return data;
+        }
+
+        // Choose a category and render the dynamic template
+        function chooseCategory(cat){
+            window.selectedCategory = cat;
+            const label = document.getElementById('selected-category-label');
+            const friendly = ({smartphone:'Smartphone', laptop:'Laptop', monitor:'Monitor / TV', pccomponent:'PC Component', other:'Accessories / Cables'})[cat] || cat;
+            label.textContent = friendly;
+            document.getElementById('category-grid').classList.add('hidden');
+            document.getElementById('category-form').classList.remove('hidden');
+            const dyn = document.getElementById('dynamic-fields');
+            dyn.innerHTML = categoryTemplates[cat] || categoryTemplates.other;
+            // inject pro fields if pro mode is already on
+            const proDyn = document.getElementById('dynamic-pro-fields');
+            if(proDyn){
+                proDyn.innerHTML = proToggle.checked ? (proTemplates[cat] || '') : '';
+                proDyn.classList.toggle('hidden', !proToggle.checked);
+            }
+            // attach condition listeners for newly injected radios
+            attachConditionListeners();
+            // ensure battery warning / salvage initial state
+            const sel = form.querySelector('input[name="condition"]:checked');
+            if(sel && sel.value === 'dead'){
+                batteryWarning.classList.remove('hidden'); salvageSection.classList.remove('hidden');
+            } else {
+                batteryWarning.classList.add('hidden'); salvageSection.classList.add('hidden');
+            }
+        }
+
+        function changeCategory(){
+            showCategoryGrid();
+        }
+
+        function showCategoryGrid(){
+            document.getElementById('category-grid').classList.remove('hidden');
+            document.getElementById('category-form').classList.add('hidden');
+            // clear dynamic fields
+            const dyn = document.getElementById('dynamic-fields'); if(dyn) dyn.innerHTML = '';
+            window.selectedCategory = null;
+        }
 
         // helper: show toast
         function showToast(message, timeout=2600){
@@ -799,7 +1067,12 @@
 
         // toggle tech specs (Pro Mode)
         proToggle.addEventListener('change', ()=>{
-            if(proToggle.checked){ techSpecs.classList.remove('hidden'); } else { techSpecs.classList.add('hidden'); }
+            const proDyn = document.getElementById('dynamic-pro-fields');
+            if(proToggle.checked){
+                if(proDyn && window.selectedCategory){ proDyn.innerHTML = proTemplates[window.selectedCategory] || ''; proDyn.classList.remove('hidden'); }
+            } else {
+                if(proDyn){ proDyn.innerHTML = ''; proDyn.classList.add('hidden'); }
+            }
         });
 
         // show battery warning & salvage section when condition changes
@@ -843,12 +1116,33 @@
         suggestedBtn.addEventListener('click', ()=>{
             const condEl = form.querySelector('input[name="condition"]:checked');
             const cond = condEl ? condEl.value : 'partial';
+            const cat = window.selectedCategory || 'other';
             let suggested = 0;
-            if(cond === 'works') suggested = Math.round(500 + Math.random()*4500);
-            else if(cond === 'partial') suggested = Math.round(200 + Math.random()*1200);
-            else suggested = Math.round(50 + Math.random()*300);
+            // Category-aware ranges
+            if(cat === 'laptop'){
+                if(cond === 'works') suggested = Math.round(3000 + Math.random()*12000);
+                else if(cond === 'partial') suggested = Math.round(1000 + Math.random()*4000);
+                else suggested = Math.round(200 + Math.random()*900);
+            } else if(cat === 'smartphone'){
+                if(cond === 'works') suggested = Math.round(1000 + Math.random()*8000);
+                else if(cond === 'partial') suggested = Math.round(300 + Math.random()*1500);
+                else suggested = Math.round(50 + Math.random()*500);
+            } else if(cat === 'pccomponent'){
+                if(cond === 'works') suggested = Math.round(800 + Math.random()*7000);
+                else if(cond === 'partial') suggested = Math.round(200 + Math.random()*1500);
+                else suggested = Math.round(20 + Math.random()*400);
+            } else if(cat === 'monitor'){
+                if(cond === 'works') suggested = Math.round(1200 + Math.random()*3000);
+                else if(cond === 'partial') suggested = Math.round(300 + Math.random()*900);
+                else suggested = Math.round(50 + Math.random()*300);
+            } else {
+                if(cond === 'works') suggested = Math.round(200 + Math.random()*800);
+                else if(cond === 'partial') suggested = Math.round(50 + Math.random()*300);
+                else suggested = Math.round(10 + Math.random()*150);
+            }
+
             document.getElementById('item-price').value = '₹' + suggested;
-            showToast('Based on market rates for this condition.');
+            showToast('AI estimator suggests ₹' + suggested);
         });
 
         // Data wipe guide
@@ -871,15 +1165,40 @@
                 return;
             }
 
-            // collect tech specs
-            const tech = proToggle.checked ? {
-                processor: document.getElementById('tech-processor').value.trim(),
-                ram: document.getElementById('tech-ram').value.trim(),
-                storage: document.getElementById('tech-storage').value.trim()
-            } : null;
+            // category-specific fields
+            const category = window.selectedCategory || 'other';
+            const desc = document.getElementById('item-desc').value.trim();
+            const negotiable = document.getElementById('open-to-negotiation').checked;
+            const extra = {};
+            if(category === 'smartphone'){
+                extra.os = (document.getElementById('field-os')||{value:''}).value.trim();
+                extra.storage = (document.getElementById('field-storage')||{value:''}).value.trim();
+                extra.frpLocked = !!document.getElementById('field-frp') && document.getElementById('field-frp').checked;
+                extra.screenCracked = !!document.getElementById('field-screen-cracked') && document.getElementById('field-screen-cracked').checked;
+            } else if(category === 'laptop'){
+                extra.processor = (document.getElementById('field-processor-model')||{value:''}).value.trim();
+                extra.ram = (document.getElementById('field-ram-size')||{value:''}).value.trim();
+                extra.storageType = document.querySelector('input[name="storage_type"]:checked')?.value || 'unknown';
+                extra.batteryHealth = (document.getElementById('field-battery-health')||{value:''}).value.trim();
+            } else if(category === 'monitor'){
+                extra.screenSize = (document.getElementById('field-screen-size')||{value:''}).value.trim();
+                extra.panelCondition = (document.getElementById('field-panel-condition')||{value:''}).value.trim();
+                extra.powerCable = !!document.getElementById('field-power-cable') && document.getElementById('field-power-cable').checked;
+            } else if(category === 'pccomponent'){
+                extra.partName = (document.getElementById('field-part-name')||{value:''}).value.trim();
+                extra.modelNumber = (document.getElementById('field-model-number')||{value:''}).value.trim();
+                extra.tested = !!document.getElementById('field-tested') && document.getElementById('field-tested').checked;
+                extra.knownIssues = (document.getElementById('field-known-issues')||{value:''}).value.trim();
+                extra.vram = (document.getElementById('field-vram')||{value:''}).value.trim();
+            } else if(category === 'other'){
+                extra.accessoryType = (document.getElementById('field-accessory-type')||{value:''}).value.trim();
+            }
+
+            // collect pro-mode data if enabled
+            const proData = proToggle.checked ? collectProData() : null;
 
             // salvage parts
-            const salvage = Array.from(form.querySelectorAll('input[name="salvage"]:checked')).map(i=>i.value);
+            const salvage = Array.from(document.querySelectorAll('#category-form input[name="salvage"]:checked')).map(i=>i.value);
 
             let imageUrl = '';
             const f = fileInput.files && fileInput.files[0];
@@ -887,23 +1206,26 @@
                 try{ imageUrl = await readFileAsDataURL(f); }catch(err){ console.error(err); }
             }
 
-            const newItem = { id: Date.now(), title, condition: cond, price, location:'Nagpur', desc: 'Listed by you — check messages.', image: imageUrl || 'https://picsum.photos/seed/new/800/600', techSpecs: tech, salvageParts: salvage, dataWipeConfirmed: true, sellerId: 1 };
+            const newItem = { id: Date.now(), title, description: desc, category, condition: cond, price, negotiable, location:'Nagpur', image: imageUrl || 'https://picsum.photos/seed/new/800/600', extraFields: extra, proModeData: proData, salvageParts: salvage, dataWipeConfirmed: true, sellerId: 1 };
             wasteItems.unshift(newItem);
 
-            // reset form and hide sections
+            // reset UI: go to dashboard and reset form
             form.reset(); previewImg.src = ''; previewImg.classList.add('hidden');
-            techSpecs.classList.add('hidden'); salvageSection.classList.add('hidden'); proToggle.checked = false;
-
-            // update UI and show dashboard
-            switchView('view-dashboard');
-            renderItems();
+            salvageSection.classList.add('hidden'); proToggle.checked = false;
+            document.getElementById('dynamic-pro-fields').innerHTML = ''; document.getElementById('dynamic-pro-fields').classList.add('hidden');
+            window.selectedCategory = null;
             showToast('Listed: ' + title + ' (+50 Green Points)');
+
+            // update points and UI
             const pts = parseInt(document.getElementById('stat-points').textContent.replace(/,/g,'')) + 50;
             document.getElementById('stat-points').textContent = pts.toLocaleString();
             const bar = document.getElementById('progress-bar');
             const current = parseFloat(bar.style.width) || 45;
             const next = Math.min(100, current + 3);
             bar.style.width = next + '%';
+
+            switchView('view-dashboard');
+            renderItems();
         }
 
         // Profile update demo
