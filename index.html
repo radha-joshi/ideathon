@@ -127,7 +127,64 @@
                 <p class="text-sm text-slate-500">Items available near you</p>
             </div>
 
+            <!-- FILTER PANEL -->
+            <div class="bg-white rounded-xl border border-slate-200 p-4 mb-6 shadow-sm">
+                <!-- Filter Row 1: Price, Location, Condition -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 block mb-2">Price (₹)</label>
+                        <div class="flex gap-2 items-center">
+                            <input type="number" id="filter-price-min" placeholder="Min" class="w-16 px-2 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            <span class="text-slate-400 text-xs">to</span>
+                            <input type="number" id="filter-price-max" placeholder="Max" class="w-16 px-2 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            <button onclick="applyFilters()" class="px-3 py-2 bg-emerald-600 text-white text-sm font-semibold rounded-lg hover:bg-emerald-700 transition whitespace-nowrap">Go</button>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 block mb-2">Location</label>
+                        <select id="filter-location" onchange="applyFilters()" class="w-full px-2 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            <option value="">All Locations</option>
+                            <option value="Main Campus">Main Campus</option>
+                            <option value="Girls Hostel">Girls Hostel</option>
+                            <option value="IT Park">IT Park</option>
+                            <option value="Civil Lines">Civil Lines</option>
+                            <option value="Hostels">Hostels</option>
+                            <option value="Nearby">Nearby</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 block mb-2">Condition</label>
+                        <select id="filter-condition" onchange="applyFilters()" class="w-full px-2 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            <option value="">Any Condition</option>
+                            <option value="works">Working</option>
+                            <option value="partial">Repairable</option>
+                            <option value="dead">Scrap</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 block mb-2">Sort By</label>
+                        <select id="filter-sort" onchange="applyFilters()" class="w-full px-2 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            <option value="newest">Newest First</option>
+                            <option value="price-asc">Price (Low to High)</option>
+                            <option value="price-desc">Price (High to Low)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Active Filters Row -->
+                <div id="active-filters" class="flex flex-wrap gap-2"></div>
+            </div>
+
+            <!-- ITEMS GRID -->
             <div id="items-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+            
+            <!-- EMPTY STATE -->
+            <div id="empty-state" class="hidden text-center py-12">
+                <div class="text-6xl mb-4">📦</div>
+                <h3 class="text-xl font-bold text-slate-900 mb-2">No items found</h3>
+                <p class="text-slate-600">Try adjusting your filters or search terms</p>
+                <button onclick="resetFilters()" class="mt-4 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition font-semibold">Clear Filters</button>
+            </div>
         </div>
     </section>
 
@@ -642,19 +699,43 @@
 
         // Sample dynamic items (include image URLs + sellerId + pricing)
         const wasteItems = [
-            { id:1, title:'Fried GPU (GTX 970)', condition:'dead', price:'Free', location:'Nagpur', desc:'Heavily fried, fan seized. Good for parts (VRAM, capacitors).', image:'https://picsum.photos/seed/gpu/800/600', sellerId: 2 },
-            { id:2, title:'Broken Monitor 22"', condition:'partial', price:'₹800', location:'Nagpur', desc:'Cracked bezel, display has some dead pixels.', image:'https://picsum.photos/seed/monitor/800/600', sellerId: 3 },
-            { id:3, title:'Old Nokia 3310', condition:'works', price:'₹300', location:'Nagpur', desc:'Classic, battery holds charge. Good for collectors.', image:'https://picsum.photos/seed/nokia/800/600', sellerId: 2 },
-            { id:4, title:'Laptop Battery (x2)', condition:'dead', price:'Free', location:'Nagpur', desc:'Swollen cells. Dispose safely — see safety notes.', image:'https://picsum.photos/seed/battery/800/600', sellerId: 1 },
-            { id:5, title:'Defunct DSLR', condition:'partial', price:'₹2500', location:'Nagpur', desc:'Shutter stuck, lens fine. Great for parts or repair.', image:'https://picsum.photos/seed/dslr/800/600', sellerId: 3 },
-            { id:6, title:'Dead Smartphone (Water Damaged)', condition:'dead', price:'Free', location:'Nagpur', desc:'Power circuit fried; salvageable for ICs and camera.', image:'https://picsum.photos/seed/phone/800/600', sellerId: 1 }
+            { id:1, title:'Fried GPU (GTX 970)', condition:'dead', price:0, category:'pccomponent', location:'Main Campus', desc:'Heavily fried, fan seized. Good for parts (VRAM, capacitors).', image:'https://picsum.photos/seed/gpu/800/600', sellerId: 2 },
+            { id:2, title:'Broken Monitor 22" Dell', condition:'partial', price:800, category:'monitor', location:'Main Campus', desc:'Cracked bezel, display has some dead pixels.', image:'https://picsum.photos/seed/monitor/800/600', sellerId: 3 },
+            { id:3, title:'Old Nokia 3310', condition:'works', price:300, category:'phone', location:'Girls Hostel', desc:'Classic, battery holds charge. Good for collectors.', image:'https://picsum.photos/seed/nokia/800/600', sellerId: 2 },
+            { id:4, title:'Laptop Battery (x2)', condition:'dead', price:0, category:'accessory', location:'IT Park', desc:'Swollen cells. Dispose safely — see safety notes.', image:'https://picsum.photos/seed/battery/800/600', sellerId: 1 },
+            { id:5, title:'Defunct DSLR Canon EOS', condition:'partial', price:2500, category:'accessory', location:'Civil Lines', desc:'Shutter stuck, lens fine. Great for parts or repair.', image:'https://picsum.photos/seed/dslr/800/600', sellerId: 3 },
+            { id:6, title:'Dead Smartphone (Water Damaged)', condition:'dead', price:0, category:'phone', location:'Main Campus', desc:'Power circuit fried; salvageable for ICs and camera.', image:'https://picsum.photos/seed/phone/800/600', sellerId: 1 },
+            { id:7, title:'Broken MacBook Air 2013', condition:'partial', price:5500, category:'laptop', location:'Main Campus', desc:'Screen works, keyboard damaged, battery dead. Good for parts.', image:'https://picsum.photos/seed/laptop1/800/600', sellerId: 2 },
+            { id:8, title:'LAN Cables Bundle (10pcs)', condition:'works', price:150, category:'accessory', location:'Hostels', desc:'Cat5e ethernet cables, various lengths, tested.', image:'https://picsum.photos/seed/cables/800/600', sellerId: 1 },
+            { id:9, title:'Old Breadboard & Components', condition:'works', price:200, category:'pccomponent', location:'Girls Hostel', desc:'Arduino breadboards, resistors, LED kit. Good for learning.', image:'https://picsum.photos/seed/breadboard/800/600', sellerId: 3 },
+            { id:10, title:'Fried Arduino Board', condition:'dead', price:0, category:'pccomponent', location:'IT Park', desc:'Burnt components, but casing intact. Salvage chips.', image:'https://picsum.photos/seed/arduino/800/600', sellerId: 2 },
+            { id:11, title:'Monitor with Lines on Screen', condition:'partial', price:600, category:'monitor', location:'Civil Lines', desc:'24" LG, vertical lines but mostly functional.', image:'https://picsum.photos/seed/monitor2/800/600', sellerId: 1 },
+            { id:12, title:'iPhone 6S (Cracked Screen)', condition:'partial', price:3500, category:'phone', location:'Main Campus', desc:'Works fine, just needs screen replacement.', image:'https://picsum.photos/seed/iphone/800/600', sellerId: 3 },
+            { id:13, title:'HP Pavilion Laptop (Non-Starting)', condition:'dead', price:1200, category:'laptop', location:'Hostels', desc:'Powers on but no display. Logic board issue.', image:'https://picsum.photos/seed/laptop2/800/600', sellerId: 2 },
+            { id:14, title:'USB Charging Cables (20pcs bulk)', condition:'works', price:400, category:'accessory', location:'Main Campus', desc:'Micro USB, Type-C, Lightning mix. Wholesale lot.', image:'https://picsum.photos/seed/usb/800/600', sellerId: 1 },
+            { id:15, title:'Broken Wireless Mouse & Keyboard', condition:'partial', price:250, category:'accessory', location:'Girls Hostel', desc:'Logitech set, mouse works, keyboard keys stuck.', image:'https://picsum.photos/seed/keyboard/800/600', sellerId: 3 },
+            { id:16, title:'DDR4 RAM (16GB) - Single Stick', condition:'works', price:2800, category:'pccomponent', location:'IT Park', desc:'Corsair Vengeance, fully tested, working condition.', image:'https://picsum.photos/seed/ram/800/600', sellerId: 2 },
+            { id:17, title:'Samsung SSD 256GB (Slow)', condition:'partial', price:1500, category:'pccomponent', location:'Civil Lines', desc:'Works but slow. Might have bad sectors.', image:'https://picsum.photos/seed/ssd/800/600', sellerId: 1 },
+            { id:18, title:'Old Desktop Tower (No HDD)', condition:'dead', price:800, category:'accessory', location:'Main Campus', desc:'Dell OptiPlex, no hard drive, missing side panel.', image:'https://picsum.photos/seed/desktop/800/600', sellerId: 3 },
+            { id:19, title:'Broken Tablet - iPad 5th Gen', condition:'partial', price:4000, category:'phone', location:'Hostels', desc:'Screen cracked, logic board intact, no charger.', image:'https://picsum.photos/seed/ipad/800/600', sellerId: 2 },
+            { id:20, title:'Thunderbolt to USB Adapter Pack', condition:'works', price:600, category:'accessory', location:'Girls Hostel', desc:'Apple & 3rd party adapters, various types, tested.', image:'https://picsum.photos/seed/adapter/800/600', sellerId: 1 }
         ];
 
         // Render items into grid
         function renderItems(itemsToRender = wasteItems){
             const grid = document.getElementById('items-grid');
+            const emptyState = document.getElementById('empty-state');
+            
+            if(!itemsToRender || itemsToRender.length === 0){
+                grid.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+            
+            emptyState.classList.add('hidden');
             grid.innerHTML = itemsToRender.map(item => {
                 const seller = users.find(u => u.id === item.sellerId);
+                const priceDisplay = item.price === 0 ? 'Free' : `₹${item.price}`;
                 return `
                 <article class="glass rounded-2xl p-0 overflow-hidden">
                     <div class="h-44 w-full overflow-hidden">
@@ -663,7 +744,7 @@
                     <div class="p-5">
                         <div class="flex justify-between items-start mb-3">
                             <span class="text-xs font-bold px-2 py-1 rounded-full ${item.condition==='dead'? 'bg-red-100 text-red-700' : item.condition==='partial'? 'bg-yellow-50 text-yellow-700' : 'bg-emerald-50 text-emerald-700'}">${item.condition==='dead'? 'Dead / Scrap' : item.condition==='partial'? 'Partially Broken' : 'Works Fine'}</span>
-                            <span class="font-bold text-slate-800">${item.price}</span>
+                            <span class="font-bold text-slate-800">${priceDisplay}</span>
                         </div>
                         <h3 class="font-bold text-lg text-slate-900 mb-1">${item.title}</h3>
                         <p class="text-sm text-slate-500 mb-3">${item.desc}</p>
@@ -678,13 +759,101 @@
             }).join('');
         }
 
+        // Filter logic
+        function applyFilters(){
+            let filtered = [...wasteItems];
+            
+            // Apply search filter (from searchInput)
+            const searchTerm = document.getElementById('searchInput')?.value.toLowerCase() || '';
+            if(searchTerm){
+                filtered = filtered.filter(item =>
+                    item.title.toLowerCase().includes(searchTerm) ||
+                    item.desc.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            // Apply price filter
+            const minPrice = parseFloat(document.getElementById('filter-price-min')?.value) || 0;
+            const maxPrice = parseFloat(document.getElementById('filter-price-max')?.value) || Infinity;
+            filtered = filtered.filter(item => item.price >= minPrice && item.price <= maxPrice);
+            
+            // Apply location filter
+            const location = document.getElementById('filter-location')?.value || '';
+            if(location){
+                filtered = filtered.filter(item => item.location === location);
+            }
+            
+            // Apply condition filter
+            const condition = document.getElementById('filter-condition')?.value || '';
+            if(condition){
+                filtered = filtered.filter(item => item.condition === condition);
+            }
+            
+            // Apply sorting
+            const sortBy = document.getElementById('filter-sort')?.value || 'newest';
+            if(sortBy === 'price-asc'){
+                filtered.sort((a, b) => a.price - b.price);
+            } else if(sortBy === 'price-desc'){
+                filtered.sort((a, b) => b.price - a.price);
+            } else {
+                filtered.sort((a, b) => b.id - a.id); // newest (by id)
+            }
+            
+            // Update active filters display
+            updateActiveFilters();
+            
+            // Render filtered items
+            renderItems(filtered);
+        }
+        
+        function updateActiveFilters(){
+            const container = document.getElementById('active-filters');
+            const filters = [];
+            
+            const minPrice = document.getElementById('filter-price-min')?.value;
+            const maxPrice = document.getElementById('filter-price-max')?.value;
+            if(minPrice || maxPrice){
+                filters.push(`₹${minPrice || '0'} - ₹${maxPrice || '∞'}`);
+            }
+            
+            const location = document.getElementById('filter-location')?.value;
+            if(location) filters.push(location);
+            
+            const condition = document.getElementById('filter-condition')?.value;
+            if(condition){
+                const conditionLabels = { 'works': 'Working', 'partial': 'Repairable', 'dead': 'Scrap' };
+                filters.push(conditionLabels[condition]);
+            }
+            
+            if(filters.length > 0){
+                container.innerHTML = filters.map(f => 
+                    `<span class="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-semibold rounded-full flex items-center gap-1">
+                        ${f}
+                        <button onclick="applyFilters()" class="ml-1 text-emerald-600 hover:text-emerald-800">✕</button>
+                    </span>`
+                ).join('');
+            } else {
+                container.innerHTML = '';
+            }
+        }
+        
+        function resetFilters(){
+            document.getElementById('filter-price-min').value = '';
+            document.getElementById('filter-price-max').value = '';
+            document.getElementById('filter-location').value = '';
+            document.getElementById('filter-condition').value = '';
+            document.getElementById('filter-sort').value = 'newest';
+            applyFilters();
+        }
+
         // open detail view and populate fields
         function openDetail(id){
             const it = wasteItems.find(x=>x.id===id);
             if(!it) return;
             const seller = users.find(u => u.id === it.sellerId);
             document.getElementById('detail-title').textContent = it.title;
-            document.getElementById('detail-price').textContent = it.price;
+            const priceDisplay = it.price === 0 ? 'Free' : `₹${it.price}`;
+            document.getElementById('detail-price').textContent = priceDisplay;
             document.getElementById('detail-condition').textContent = it.condition==='dead'? 'Dead / Scrap' : it.condition==='partial'? 'Partially Broken' : 'Works Fine';
             document.getElementById('detail-desc').textContent = it.desc;
             
@@ -702,7 +871,7 @@
             // Show/hide buttons based on price
             const buyBtn = document.getElementById('btn-buy');
             const pickupLink = document.getElementById('pickup-link');
-            if(it.price === 'Free'){
+            if(it.price === 0){
                 buyBtn.textContent = '🆓 Claim for Free';
             } else {
                 buyBtn.textContent = '💳 Buy Now';
