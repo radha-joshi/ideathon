@@ -83,10 +83,8 @@
             
             <button onclick="navTo('view-form')" id="nav-sell" class="text-sm px-3 py-2 pb-2 border-b-2 border-transparent text-slate-700 hover:text-slate-900 transition font-medium">➕ Sell Waste</button>
             
-            <button onclick="navTo('view-profile')" id="nav-impact" class="text-sm px-3 py-2 pb-2 border-b-2 border-transparent text-slate-700 hover:text-slate-900 transition font-medium">💚 Impact</button>
-            
             <button onclick="doLogout()" class="text-sm px-3 py-2 rounded-lg text-slate-500 hover:text-slate-900 transition">Logout</button>
-            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Radha" class="w-9 h-9 rounded-full border border-slate-200 bg-slate-100 cursor-pointer hover:ring-2 hover:ring-emerald-500 transition" onclick="navTo('view-profile')">
+            <img id="profile-avatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Radha" class="w-9 h-9 rounded-full border border-slate-200 bg-slate-100 cursor-pointer hover:ring-2 hover:ring-emerald-500 transition" onclick="openProfileModal()">
         </nav>
 
         <!-- Mobile controls -->
@@ -106,8 +104,7 @@
         <div class="glass rounded-xl p-4 flex flex-col gap-3">
             <button onclick="navTo('view-dashboard'); closeMobileMenu()" class="text-left text-slate-700 font-medium px-3 py-2 rounded-lg hover:bg-slate-50">📊 Dashboard</button>
             <button onclick="navTo('view-form'); closeMobileMenu()" class="text-left text-slate-700 font-medium px-3 py-2 rounded-lg hover:bg-slate-50">➕ Sell Waste</button>
-            <button onclick="navTo('view-profile'); closeMobileMenu()" class="text-left text-slate-700 font-medium px-3 py-2 rounded-lg hover:bg-slate-50">💚 Impact</button>
-            <button onclick="navTo('view-profile'); closeMobileMenu()" class="text-left text-slate-700 font-medium px-3 py-2 rounded-lg hover:bg-slate-50">Profile</button>
+            <button onclick="openProfileModal(); closeMobileMenu()" class="text-left text-slate-700 font-medium px-3 py-2 rounded-lg hover:bg-slate-50">Profile</button>
             <button onclick="doLogout(); closeMobileMenu()" class="text-left text-slate-500 px-3 py-2 rounded-lg hover:bg-slate-50">Logout</button>
         </div>
     </div>
@@ -421,38 +418,9 @@
                 </div>
             </div>
 
-            <div class="flex gap-3 mb-6">
-                <button id="tab-impact" onclick="switchTab('impact')" class="px-6 py-2 rounded-xl font-bold text-slate-900 bg-emerald-100 border-b-2 border-emerald-600">📊 Impact Stats</button>
+                <div class="flex gap-3 mb-6">
                 <button id="tab-listings" onclick="switchTab('listings')" class="px-6 py-2 rounded-xl font-bold text-slate-700 hover:bg-slate-100">📦 My Listings</button>
                 <button id="tab-history" onclick="switchTab('history')" class="px-6 py-2 rounded-xl font-bold text-slate-700 hover:bg-slate-100">🛒 Purchase History</button>
-            </div>
-
-            <!-- Tab: Impact Stats -->
-            <div id="tab-content-impact">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                    <div class="glass rounded-2xl p-6 text-center cursor-pointer hover:shadow-lg transition" onclick="switchView('view-green-points')">
-                        <div class="text-sm text-slate-500">Green Points</div>
-                        <div id="stat-points" class="text-3xl font-extrabold text-emerald-600 mt-2">1,250</div>
-                    </div>
-                    <div class="glass rounded-2xl p-6 text-center cursor-pointer hover:shadow-lg transition" onclick="switchView('view-leaderboard')">
-                        <div class="text-sm text-slate-500">CO₂ Prevented</div>
-                        <div id="stat-co2" class="text-3xl font-extrabold text-slate-800 mt-2">12 kg</div>
-                    </div>
-                    <div class="glass rounded-2xl p-6 text-center cursor-pointer hover:shadow-lg transition" onclick="switchView('view-leaderboard')">
-                        <div class="text-sm text-slate-500">Community Rank</div>
-                        <div id="stat-rank" class="text-2xl font-bold text-slate-700 mt-2">Silver Scavenger</div>
-                    </div>
-                </div>
-
-                <div class="glass rounded-2xl p-6">
-                    <div class="flex items-center justify-between mb-2">
-                        <div class="text-sm font-bold text-slate-700">Progress to Gold</div>
-                        <div class="text-xs text-slate-500">45%</div>
-                    </div>
-                    <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
-                        <div id="progress-bar" class="h-3 bg-emerald-500 rounded-full" style="width:45%"></div>
-                    </div>
-                </div>
             </div>
 
             <!-- Tab: My Listings -->
@@ -548,6 +516,51 @@
 
                 <!-- Done Button -->
                 <button onclick="closeRecyclerModal()" class="w-full py-2 rounded-lg bg-slate-800 text-white font-bold hover:bg-slate-900">Done</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PROFILE / IMPACT MODAL -->
+    <div id="profile-modal" class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div class="glass rounded-2xl p-6 max-w-md w-full max-h-screen overflow-y-auto" role="dialog" aria-modal="true">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <div id="modal-user-name" class="text-lg font-bold text-slate-900">Radha Joshi - 2nd Year CS</div>
+                    <div id="modal-user-college" class="text-xs text-slate-500">VNIT Nagpur</div>
+                </div>
+                <button onclick="closeProfileModal()" class="text-slate-400 hover:text-slate-900">✕</button>
+            </div>
+
+            <div id="modal-impact-body" class="space-y-4">
+                <!-- Impact stats (moved from profile view) -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="glass rounded-2xl p-4 text-center">
+                        <div class="text-sm text-slate-500">Green Points</div>
+                        <div id="modal-stat-points" class="text-2xl font-extrabold text-emerald-600 mt-2">1,250</div>
+                    </div>
+                    <div class="glass rounded-2xl p-4 text-center">
+                        <div class="text-sm text-slate-500">CO₂ Prevented</div>
+                        <div id="modal-stat-co2" class="text-2xl font-extrabold text-slate-800 mt-2">12 kg</div>
+                    </div>
+                    <div class="glass rounded-2xl p-4 text-center">
+                        <div class="text-sm text-slate-500">Community Rank</div>
+                        <div id="modal-stat-rank" class="text-xl font-bold text-slate-700 mt-2">Silver Scavenger</div>
+                    </div>
+                </div>
+
+                <div class="glass rounded-2xl p-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="text-sm font-bold text-slate-700">Progress to Gold</div>
+                        <div id="modal-progress-label" class="text-xs text-slate-500">45%</div>
+                    </div>
+                    <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
+                        <div id="modal-progress-bar" class="h-3 bg-emerald-500 rounded-full" style="width:45%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <button onclick="doLogout()" class="w-full py-3 rounded-2xl bg-red-600 text-white font-bold hover:bg-red-700">Log Out</button>
             </div>
         </div>
     </div>
@@ -887,6 +900,40 @@
             if(window.innerWidth >= 768) closeMobileMenu();
         });
 
+        // Profile modal handling
+        function openProfileModal(){
+            const modal = document.getElementById('profile-modal');
+            if(!modal) return;
+            // populate with current user data
+            const me = users.find(u=>u.isMe) || users[0];
+            document.getElementById('modal-user-name').textContent = `${me.name} - 2nd Year CS`;
+            document.getElementById('modal-user-college').textContent = me.college || 'VNIT Nagpur';
+            document.getElementById('modal-stat-points').textContent = me.greenPoints?.toLocaleString() || '0';
+            // sample values for CO2 and rank (could be computed)
+            document.getElementById('modal-stat-co2').textContent = window.statCO2 || '12 kg';
+            document.getElementById('modal-stat-rank').textContent = window.statRank || 'Silver Scavenger';
+            document.getElementById('modal-progress-label').textContent = window.statProgressLabel || '45%';
+            document.getElementById('modal-progress-bar').style.width = (window.statProgressPercent || 45) + '%';
+            modal.classList.remove('hidden');
+        }
+
+        function closeProfileModal(){
+            const modal = document.getElementById('profile-modal');
+            if(!modal) return;
+            modal.classList.add('hidden');
+        }
+
+        // Close profile modal on outside click
+        document.addEventListener('click', function(e){
+            const modal = document.getElementById('profile-modal');
+            if(!modal || modal.classList.contains('hidden')) return;
+            const dialog = modal.querySelector('[role="dialog"]');
+            if(dialog && !dialog.contains(e.target)) closeProfileModal();
+        });
+
+        // Close profile modal on Escape
+        document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeProfileModal(); });
+
         // open detail view and populate fields
         function openDetail(id){
             const it = wasteItems.find(x=>x.id===id);
@@ -1132,7 +1179,7 @@
             const navMap = {
                 'view-dashboard': 'nav-dashboard',
                 'view-form': 'nav-sell',
-                'view-profile': 'nav-impact'
+                //'view-profile': 'nav-impact' // profile doesn't have a dedicated nav link now
             };
 
             // Active style classes
@@ -1140,7 +1187,7 @@
             const inactiveClass = 'text-slate-700';
 
             // Remove active state from all nav links
-            ['nav-dashboard', 'nav-sell', 'nav-impact'].forEach(id => {
+            ['nav-dashboard', 'nav-sell'].forEach(id => {
                 const el = document.getElementById(id);
                 if(el){
                     el.classList.remove(...activeClass.split(' '));
@@ -1653,13 +1700,17 @@
         // Switch profile tabs
         function switchTab(tab){
             // Hide all tab contents
-            document.getElementById('tab-content-impact').classList.add('hidden');
+            const elImpact = document.getElementById('tab-content-impact');
+            if(elImpact) elImpact.classList.add('hidden');
             document.getElementById('tab-content-listings').classList.add('hidden');
             document.getElementById('tab-content-history').classList.add('hidden');
             
             // Reset all tab buttons
-            document.getElementById('tab-impact').classList.remove('bg-emerald-100', 'border-b-2', 'border-emerald-600');
-            document.getElementById('tab-impact').classList.add('hover:bg-slate-100', 'text-slate-700');
+            const tabImpactBtn = document.getElementById('tab-impact');
+            if(tabImpactBtn){
+                tabImpactBtn.classList.remove('bg-emerald-100', 'border-b-2', 'border-emerald-600');
+                tabImpactBtn.classList.add('hover:bg-slate-100', 'text-slate-700');
+            }
             document.getElementById('tab-listings').classList.remove('bg-emerald-100', 'border-b-2', 'border-emerald-600');
             document.getElementById('tab-listings').classList.add('hover:bg-slate-100', 'text-slate-700');
             document.getElementById('tab-history').classList.remove('bg-emerald-100', 'border-b-2', 'border-emerald-600');
@@ -1667,10 +1718,14 @@
             
             // Show selected tab
             if(tab === 'impact'){
-                document.getElementById('tab-content-impact').classList.remove('hidden');
-                document.getElementById('tab-impact').classList.add('bg-emerald-100', 'border-b-2', 'border-emerald-600');
-                document.getElementById('tab-impact').classList.remove('hover:bg-slate-100', 'text-slate-700');
-                document.getElementById('tab-impact').classList.add('text-slate-900');
+                if(elImpact){
+                    elImpact.classList.remove('hidden');
+                }
+                if(tabImpactBtn){
+                    tabImpactBtn.classList.add('bg-emerald-100', 'border-b-2', 'border-emerald-600');
+                    tabImpactBtn.classList.remove('hover:bg-slate-100', 'text-slate-700');
+                    tabImpactBtn.classList.add('text-slate-900');
+                }
             } else if(tab === 'listings'){
                 document.getElementById('tab-content-listings').classList.remove('hidden');
                 document.getElementById('tab-listings').classList.add('bg-emerald-100', 'border-b-2', 'border-emerald-600');
