@@ -75,7 +75,8 @@
             </div>
         </div>
 
-        <nav class="flex items-center gap-4">
+        <!-- Desktop Links -->
+        <nav class="hidden md:flex items-center gap-4">
             <input id="search-bar" placeholder="Search items, sellers, cities..." class="px-4 py-2 rounded-xl border border-slate-200 bg-white/80 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 w-48" oninput="handleSearch()">
             
             <button onclick="navTo('view-dashboard')" id="nav-dashboard" class="text-sm px-3 py-2 pb-2 border-b-2 border-transparent text-slate-700 hover:text-slate-900 transition font-medium">📊 Dashboard</button>
@@ -87,7 +88,29 @@
             <button onclick="doLogout()" class="text-sm px-3 py-2 rounded-lg text-slate-500 hover:text-slate-900 transition">Logout</button>
             <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Radha" class="w-9 h-9 rounded-full border border-slate-200 bg-slate-100 cursor-pointer hover:ring-2 hover:ring-emerald-500 transition" onclick="navTo('view-profile')">
         </nav>
+
+        <!-- Mobile controls -->
+        <div class="flex md:hidden items-center gap-3">
+            <input id="search-bar-mobile" placeholder="Search" class="px-3 py-2 rounded-lg border border-slate-200 bg-white/80 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 w-36" oninput="handleSearch()">
+            <button id="hamburger-btn" onclick="toggleMobileMenu()" class="p-2 rounded-lg bg-white/30 hover:bg-white/50 transition">
+                <!-- simple hamburger SVG -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
+        </div>
     </header>
+
+    <!-- Mobile Menu Dropdown (hidden by default) -->
+    <div id="mobile-menu" class="hidden md:hidden max-w-5xl mx-auto mt-2 px-4 w-full" style="position:relative; z-index:40;">
+        <div class="glass rounded-xl p-4 flex flex-col gap-3">
+            <button onclick="navTo('view-dashboard'); closeMobileMenu()" class="text-left text-slate-700 font-medium px-3 py-2 rounded-lg hover:bg-slate-50">📊 Dashboard</button>
+            <button onclick="navTo('view-form'); closeMobileMenu()" class="text-left text-slate-700 font-medium px-3 py-2 rounded-lg hover:bg-slate-50">➕ Sell Waste</button>
+            <button onclick="navTo('view-profile'); closeMobileMenu()" class="text-left text-slate-700 font-medium px-3 py-2 rounded-lg hover:bg-slate-50">💚 Impact</button>
+            <button onclick="navTo('view-profile'); closeMobileMenu()" class="text-left text-slate-700 font-medium px-3 py-2 rounded-lg hover:bg-slate-50">Profile</button>
+            <button onclick="doLogout(); closeMobileMenu()" class="text-left text-slate-500 px-3 py-2 rounded-lg hover:bg-slate-50">Logout</button>
+        </div>
+    </div>
 
     <main id="main-content" class="flex-1 flex flex-col w-full">
 
@@ -130,7 +153,7 @@
             <!-- FILTER PANEL -->
             <div class="bg-white rounded-xl border border-slate-200 p-4 mb-6 shadow-sm">
                 <!-- Filter Row 1: Price, Location, Condition -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
                     <div>
                         <label class="text-xs font-semibold text-slate-600 block mb-2">Price (₹)</label>
                         <div class="flex gap-2 items-center">
@@ -176,7 +199,7 @@
             </div>
 
             <!-- ITEMS GRID -->
-            <div id="items-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+            <div id="items-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
             
             <!-- EMPTY STATE -->
             <div id="empty-state" class="hidden text-center py-12">
@@ -435,7 +458,7 @@
             <!-- Tab: My Listings -->
             <div id="tab-content-listings" class="hidden">
                 <h3 class="text-lg font-bold text-slate-900 mb-4">Items you've listed</h3>
-                <div id="my-listings-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-6"></div>
+                <div id="my-listings-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
             </div>
 
             <!-- Tab: Purchase History -->
@@ -679,7 +702,7 @@
             </div>
 
             <h3 class="text-lg font-bold text-slate-900 mb-4">Active Listings</h3>
-            <div id="seller-items-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6"></div>
+            <div id="seller-items-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6"></div>
 
             <h3 class="text-lg font-bold text-slate-900 mb-4">Recent Reviews</h3>
             <div id="seller-reviews-list" class="space-y-3"></div>
@@ -845,6 +868,24 @@
             document.getElementById('filter-sort').value = 'newest';
             applyFilters();
         }
+
+        // Mobile menu toggles
+        function toggleMobileMenu(){
+            const el = document.getElementById('mobile-menu');
+            if(!el) return;
+            el.classList.toggle('hidden');
+        }
+
+        function closeMobileMenu(){
+            const el = document.getElementById('mobile-menu');
+            if(!el) return;
+            el.classList.add('hidden');
+        }
+
+        // Close mobile menu when viewport becomes desktop-sized
+        window.addEventListener('resize', function(){
+            if(window.innerWidth >= 768) closeMobileMenu();
+        });
 
         // open detail view and populate fields
         function openDetail(id){
