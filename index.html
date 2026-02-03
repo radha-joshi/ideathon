@@ -216,7 +216,7 @@
         <div class="max-w-3xl w-full">
             <div class="glass rounded-2xl p-5 mb-6">
                 <div class="flex items-center justify-between">
-                    <button onclick="goBack()" class="text-slate-600">← Back</button>
+                    <button onclick="goBack()" class="text-slate-600 transition-transform duration-200 hover:scale-110 hover:text-emerald-800 hover:font-bold">← Back</button>
                     <div></div>
                 </div>
             </div>
@@ -765,7 +765,7 @@
                 const seller = users.find(u => u.id === item.sellerId);
                 const priceDisplay = item.price === 0 ? 'Free' : `₹${item.price}`;
                 return `
-                <article class="glass rounded-2xl p-0 overflow-hidden cursor-pointer hover:shadow-xl transition" onclick="openDetail(${item.id})">
+                <article class="glass rounded-2xl p-0 overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 hover:scale-[1.02] hover:border-emerald-500/50 border border-transparent" onclick="openDetail(${item.id})">
                     <div class="h-44 w-full overflow-hidden">
                         <img src="${item.image || 'https://picsum.photos/seed/placeholder/800/600'}" alt="${item.title}" class="w-full h-full object-cover">
                     </div>
